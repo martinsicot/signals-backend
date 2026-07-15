@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.meta_title|default:product.name }} — Signals{% endblock %}
+{% block meta_description %}{{ product.meta_description|default:product.description|truncatechars:160 }}{% endblock %}
+
+{% block meta_extra %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ product.name|escapejs }}",
+  "description": "{{ product.description|escapejs }}",
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "EUR",
+    "price": "{{ product.price }}",
+    "availability": "https://schema.org/InStock",
+    "seller": {"@type": "Organization", "name": "Signals"}
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="text-sm text-gray-500 mb-6 flex gap-2">
+    <a href="/" class="hover:text-blue-700">Accueil</a>
+    <span>›</span>
+    <a href="/catalogue/" class="hover:text-blue-700">Catalogue</a>
+    <span>›</span>
+    <a href="/catalogue/{{ product.category.slug }}/" class="hover:text-blue-700">{{ product.category.name }}</a>
+    <span>›</span>
+    <span class="text-gray-900">{{ product.name }}</span>
+</nav>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+    <!-- Image -->
+    <div class="bg-gray-50 rounded-xl flex items-center justify-center p-10 min-h-72">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="max-h-80 object-contain">
+        {% else %}
+        <div class="text-gray-300 text-sm">Pas d'image disponible</div>
+        {% endif %}
+    </div>
+
+    <!-- Details -->
+    <div>
+        <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">{{ product.category.name }}</p>
+        <h1 class="text-2xl font-bold mb-4 leading-tight">{{ product.name }}</h1>
+
+        {% if product.dimensions or product.material %}
+        <dl class="text-sm mb-6 space-y-2 border rounded-lg p-4 bg-gray-50">
+            {% if product.dimensions %}
+            <div class="flex justify-between"><dt class="text-gray-500">Dimensions</dt><dd class="font-medium">{{ product.dimensions }}</dd></div>
+            {% endif %}
+            {% if product.material %}
+            <div class="flex justify-between"><dt class="text-gray-500">Matériau</dt><dd class="font-medium">{{ product.material }}</dd></div>
+            {% endif %}
+        </dl>
+        {% endif %}
+
+        {% if product.description %}
+        <p class="text-gray-600 mb-6 leading-relaxed text-sm">{{ product.description }}</p>
+        {% endif %}
+
+        <div class="mb-6">
+            <p class="text-3xl font-bold">{{ product.price }} €</p>
+            <p class="text-xs text-gray-400 mt-1">TVA incluse</p>
+        </div>
+
+        <div class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+            <span class="text-green-600 font-medium">✓ En stock</span>
+            <span>·</span>
+            <span>Fabrication sous 3 jours ouvrés</span>
+            <span>·</span>
+            <span>Livraison offerte dès 200 €</span>
+        </div>
+
+        <!-- Add to cart — htmx -->
+        <div class="flex items-center gap-3"
+             hx-on:htmx:after-request="document.body.dispatchEvent(new Event('cart-updated')); showAddedFeedback()">
+            <input type="number" id="qty" name="quantity" value="1" min="1" max="50"
+                   class="w-20 border border-gray-300 rounded-lg px-3 py-2.5 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button
+                id="add-btn"
+                hx-post="/api/cart/add/"
+                hx-vals='js:{"product_id": {{ product.id }}, "quantity": parseInt(document.getElementById("qty").value)}'
+                hx-trigger="click"
+                hx-swap="none"
+                class="flex-1 bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-800 transition">
+                Ajouter au panier
+            </button>
+        </div>
+        <p id="added-msg" class="text-sm text-green-600 mt-2 hidden">✓ Ajouté au panier</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showAddedFeedback() {
+    const msg = document.getElementById('added-msg');
+    msg.classList.remove('hidden');
+    setTimeout(() => msg.classList.add('hidden'), 3000);
+}
+</script>
+{% endblock %}

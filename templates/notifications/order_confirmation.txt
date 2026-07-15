@@ -1,0 +1,17 @@
+Hello,
+
+Your order #{{ order.id }} has been received. We will process it once payment is confirmed.
+
+ORDER SUMMARY
+{% for line in order.lines.all %}— {{ line.product_name_snapshot }} x{{ line.quantity }} — {{ line.unit_price }} €
+{% endfor %}
+Shipping: {{ order.shipping_fee }} €
+
+Shipping address:
+{{ order.shipping_address_snapshot.first_name }} {{ order.shipping_address_snapshot.last_name }}
+{{ order.shipping_address_snapshot.line1 }}{% if order.shipping_address_snapshot.line2 %}
+{{ order.shipping_address_snapshot.line2 }}{% endif %}
+{{ order.shipping_address_snapshot.postal_code }} {{ order.shipping_address_snapshot.city }}
+
+Thank you for your order.
+The Signals team

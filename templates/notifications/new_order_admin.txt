@@ -1,0 +1,15 @@
+New paid order to process.
+
+Order #{{ order.id }}
+Customer: {{ order.contact_email }}
+Status: {{ order.get_status_display }}
+
+LINES
+{% for line in order.lines.all %}— {{ line.product_name_snapshot }} x{{ line.quantity }} ({{ line.unit_price }} € / unit)
+{% endfor %}
+Shipping fee: {{ order.shipping_fee }} €
+
+Shipping address:
+{{ order.shipping_address_snapshot }}
+
+Please place the supplier order.

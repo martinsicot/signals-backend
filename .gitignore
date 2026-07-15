@@ -1,0 +1,27 @@
+# Environment
+.env
+.env.local
+
+# Python
+*.pyc
+__pycache__/
+*.egg-info/
+dist/
+build/
+.venv/
+
+# Django
+staticfiles/
+media/
+*.sqlite3
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# OS
+.DS_Store
+
+# uv
+uv.lock.bak

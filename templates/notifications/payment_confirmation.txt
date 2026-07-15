@@ -1,0 +1,8 @@
+Hello,
+
+Payment for order #{{ order.id }} has been confirmed. Your order is now in production (allow 3 working days).
+
+You will receive a shipping notification once your order is dispatched.
+
+Thank you,
+The Signals team

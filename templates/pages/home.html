@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Signals — Panneaux de signalisation routière en ligne{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="text-center py-16 border-b border-gray-100 mb-12">
+    <h1 class="text-4xl font-bold mb-4 text-gray-900">Panneaux de signalisation<br>livrés en France</h1>
+    <p class="text-gray-500 text-lg mb-8 max-w-xl mx-auto">Conformes aux normes françaises. Fabrication aluminium. Délai 3 jours ouvrés. Livraison offerte dès 200 €.</p>
+    <a href="/catalogue/" class="inline-block bg-blue-700 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-800 transition">
+        Voir le catalogue
+    </a>
+</section>
+
+<!-- Categories -->
+{% if categories %}
+<section class="mb-12">
+    <h2 class="text-xl font-semibold mb-6">Parcourir par catégorie</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {% for cat in categories %}
+        <a href="/catalogue/{{ cat.slug }}/" class="border rounded-lg p-6 hover:border-blue-700 hover:shadow-sm transition text-center group">
+            <span class="font-medium group-hover:text-blue-700">{{ cat.name }}</span>
+            {% if cat.description %}<p class="text-sm text-gray-500 mt-1">{{ cat.description }}</p>{% endif %}
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Featured products -->
+{% if featured_products %}
+<section>
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold">Produits populaires</h2>
+        <a href="/catalogue/" class="text-sm text-blue-700 hover:underline">Voir tout →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+        {% for product in featured_products %}
+        <a href="/produits/{{ product.slug }}/" class="group border rounded-lg overflow-hidden hover:shadow-md transition">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-40 object-contain p-4 bg-gray-50">
+            {% else %}
+            <div class="w-full h-40 bg-gray-100 flex items-center justify-center">
+                <span class="text-gray-400 text-xs">Panneau</span>
+            </div>
+            {% endif %}
+            <div class="p-4">
+                <h3 class="text-sm font-medium group-hover:text-blue-700 leading-snug">{{ product.name }}</h3>
+                {% if product.dimensions %}<p class="text-xs text-gray-400 mt-1">{{ product.dimensions }}</p>{% endif %}
+                <p class="font-semibold mt-2">{{ product.price }} €</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Trust signals -->
+<section class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 py-10 border-t border-gray-100">
+    <div class="text-center">
+        <p class="text-2xl mb-2">🏭</p>
+        <h3 class="font-semibold text-sm">Fabrication aluminium</h3>
+        <p class="text-gray-500 text-xs mt-1">Normes françaises et européennes</p>
+    </div>
+    <div class="text-center">
+        <p class="text-2xl mb-2">⏱</p>
+        <h3 class="font-semibold text-sm">3 jours ouvrés</h3>
+        <p class="text-gray-500 text-xs mt-1">Délai de fabrication standard</p>
+    </div>
+    <div class="text-center">
+        <p class="text-2xl mb-2">🚚</p>
+        <h3 class="font-semibold text-sm">Livraison offerte</h3>
+        <p class="text-gray-500 text-xs mt-1">Dès 200 € d'achat</p>
+    </div>
+</section>
+{% endblock %}
