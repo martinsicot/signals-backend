@@ -1,10 +1,11 @@
 # Design System
 
 ## Constraints
-- Tailwind CSS (already in use — move from CDN to compiled with `@tailwindcss/cli` or Vite)
+- Tailwind CSS (already in use — move from CDN to compiled with Vite)
 - No component library imposed — use Tailwind + headless primitives (Headless UI or Radix) for React parts
 - HTMX for lightweight Django template interactivity
 - French language throughout — no English strings in UI
+- **React parts written in TypeScript (TSX)** — strict mode enabled
 
 ---
 
@@ -120,8 +121,17 @@ npx tailwindcss init
 
 Output: `static/css/main.css` — served by WhiteNoise in production.
 
-For React: Vite + `@vitejs/plugin-react`, output into `static/js/`.
+For React: Vite + `@vitejs/plugin-react-swc` (faster than Babel), TypeScript strict mode, output into `static/js/`.
 Django's `{% static %}` tag serves bundles. No webpack.
+
+```
+npm create vite@latest frontend -- --template react-swc-ts
+```
+
+Key config:
+- `tsconfig.json`: `"strict": true`, `"jsx": "react-jsx"`
+- `vite.config.ts`: `build.outDir = "../static/js"`, `build.emptyOutDir = true`
+- `.tsx` for all components, `.ts` for hooks and utilities
 
 ---
 

@@ -58,10 +58,11 @@ Ordered by dependency and risk. Each phase has a clear entry condition, delivera
 **Effort**: ~2 days
 
 ### Setup
-- [ ] `frontend/` directory at repo root with Vite + React
-- [ ] `vite.config.js` outputs to `static/js/`
-- [ ] `window.CSRF_TOKEN` injected in Django template
-- [ ] `useCart` hook — wraps `/api/cart/` (GET, add, update, remove, clear)
+- [ ] `frontend/` directory at repo root: `npm create vite@latest frontend -- --template react-swc-ts`
+- [ ] `vite.config.ts` outputs to `../static/js/`
+- [ ] `tsconfig.json` strict mode enabled
+- [ ] `window.CSRF_TOKEN` declared in `src/env.d.ts`, injected in Django template
+- [ ] `useCart` hook (`src/hooks/useCart.ts`) — wraps `/api/cart/` (GET, add, update, remove, clear)
 
 ### CartDrawer (global, mounted in base.html)
 - [ ] Slides in from right on "Ajouter au panier"
