@@ -6,16 +6,16 @@ Questions that need answers before or during each phase. Grouped by who can answ
 
 ## You (Martin) can decide
 
-| # | Question | Blocks | Default if not answered |
-|---|----------|--------|------------------------|
-| Q1 | Do you want a cart **drawer** (slides in from right) or a **dedicated cart page** at `/panier/`? | Phase 5 | Dedicated page — simpler, better for SEO/sharing |
-| Q2 | Should the checkout be a **multi-step flow** (address → summary → payment) or a **single long page**? | Phase 5 | Multi-step — cleaner on mobile |
-| Q3 | Guest checkout: should the address form ask for email inline, or redirect to a "guest vs account" choice screen? | Phase 5 | Inline email field — fewer clicks |
-| Q4 | Do you want a **mobile hamburger menu**, or is the current inline nav enough at mobile sizes? | Phase 3 | Hamburger for mobile — 5+ nav items is too crowded |
-| Q5 | Tailwind CDN → compiled build: do you want **npm** in this repo, or keep it CDN for V1 and compile later? | Phase 2 | Compile now — CDN is unsuitable for production (no purging) |
-| Q6 | For the CRM, should status transition buttons be **inline HTMX** on the order list, or only available on the order detail page? | Phase 7 | Detail page only — reduces risk of accidental status change |
-| Q7 | Should the home page have a **search bar**? (backend has no search endpoint yet) | Phase 3 | No — defer until search is built |
-| Q8 | What's the site's **brand name** displayed in the header? Currently "Signals" — is that final? | Phase 2 | Keep "Signals" for now |
+| # | Question | Blocks | Decision |
+|---|----------|--------|----------|
+| Q1 | Do you want a cart **drawer** (slides in from right) or a **dedicated cart page** at `/panier/`? | Phase 5 | ✅ **Both** — drawer for quick add feedback, `/panier/` full page for review |
+| Q2 | Should the checkout be a **multi-step flow** (address → summary → payment) or a **single long page**? | Phase 5 | ✅ **Multi-step flow** |
+| Q3 | Guest checkout: should the address form ask for email inline, or redirect to a "guest vs account" choice screen? | Phase 5 | ✅ **Inline email** — no gate screen, fewer clicks, better conversion |
+| Q4 | Do you want a **mobile hamburger menu**, or is the current inline nav enough at mobile sizes? | Phase 3 | ✅ **Hamburger menu** on mobile |
+| Q5 | Tailwind CDN → compiled build: do you want **npm** in this repo, or keep it CDN for V1 and compile later? | Phase 2 | ✅ **npm** — compile now |
+| Q6 | For the CRM, should status transition buttons be **inline HTMX** on the order list, or only available on the order detail page? | Phase 7 | ⏳ **Undecided** — options: (A) quick-action button per row in list (fast, misclick risk) · (B) detail page only (one extra click, safer) |
+| Q7 | Should the home page have a **search bar**? (backend has no search endpoint yet) | Phase 3 | ✅ **Yes** — needs search API endpoint to be built first |
+| Q8 | What's the site's **brand name** displayed in the header? Currently "Signals" — is that final? | Phase 2 | ⏳ **Not final** — placeholder for now |
 
 ---
 

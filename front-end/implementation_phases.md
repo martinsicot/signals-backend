@@ -63,6 +63,12 @@ Ordered by dependency and risk. Each phase has a clear entry condition, delivera
 - [ ] `window.CSRF_TOKEN` injected in Django template
 - [ ] `useCart` hook — wraps `/api/cart/` (GET, add, update, remove, clear)
 
+### CartDrawer (global, mounted in base.html)
+- [ ] Slides in from right on "Ajouter au panier"
+- [ ] Shows last added item + cart total + "Voir mon panier" link + "Commander" CTA
+- [ ] Closable via overlay click or ✕ button
+- [ ] Badge count in nav updates on every add/remove
+
 ### CartPage (`/panier/`)
 - [ ] `CartItem`: product name, unit price, quantity stepper, remove button, line total
 - [ ] `CartSummary`: subtotal, shipping fee (live from API), total, free shipping progress bar

@@ -19,6 +19,12 @@ Design and build a complete, SEO-ready frontend for a French road signage e-comm
 ## Key Questions
 → See open_questions.md for full list
 
+## Pending before Phase 3
+- [ ] Q6: CRM status button placement (list vs detail) — decide before Phase 7
+- [ ] Q8: Final brand name — placeholder "Signals" in use
+- [ ] Q9: Logo / wordmark from partner
+- [ ] Backend: `GET /api/products/search/?q=` endpoint needed before home page search bar
+
 ## Decisions Made
 - **CSS**: Tailwind CSS (already in base.html via CDN → move to compiled build in Phase 2)
 - **Interactivity on templates**: HTMX (already wired for add-to-cart)
