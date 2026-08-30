@@ -1,7 +1,10 @@
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 import pytest
-from orders.domain.exceptions import OrderTooLargeError, EmptyOrderError
+
+from orders.domain.exceptions import EmptyOrderError, OrderTooLargeError
+from tests.factories import CustomerFactory, OrderFactory, OrderLineFactory, ProductFactory
 
 
 def make_mock_order_model():
@@ -22,77 +25,63 @@ def make_mock_order_model():
     return order
 
 
+# ---------------------------------------------------------------------------
+# Create order
+# ---------------------------------------------------------------------------
+
 @pytest.mark.django_db
 class TestCreateOrderView:
-    def test_api_returns_201_when_order_is_valid(self, client):
-        # Arrange
+    url = "/api/orders/"
+
+    def test_returns_201_for_valid_guest_order(self, client):
         mock_order = make_mock_order_model()
         with patch("orders.api.views.OrderService") as MockService, \
              patch("orders.api.views.OrderModel.objects") as mock_manager:
             MockService.return_value.create_order.return_value = MagicMock(id=1)
             mock_manager.prefetch_related.return_value.get.return_value = mock_order
 
-            # Act
-            response = client.post(
-                "/api/orders/",
-                data={
-                    "items": [{"product_id": 1, "quantity": 2}],
-                    "shipping_address": {"city": "Paris"},
-                    "guest_email": "guest@example.com",
-                },
-                content_type="application/json",
-            )
+            response = client.post(self.url, data={
+                "items": [{"product_id": 1, "quantity": 2}],
+                "shipping_address": {"city": "Paris"},
+                "guest_email": "guest@example.com",
+            }, content_type="application/json")
 
-        # Assert
         assert response.status_code == 201
 
-    def test_api_returns_422_when_order_exceeds_max_quantity(self, client):
-        # Arrange
+    def test_returns_422_when_order_exceeds_max_quantity(self, client):
         with patch("orders.api.views.OrderService") as MockService:
             MockService.return_value.create_order.side_effect = OrderTooLargeError(
                 quantity=60, max_quantity=50
             )
 
-            # Act
-            response = client.post(
-                "/api/orders/",
-                data={
-                    "items": [{"product_id": 1, "quantity": 60}],
-                    "shipping_address": {},
-                    "guest_email": "guest@example.com",
-                },
-                content_type="application/json",
-            )
+            response = client.post(self.url, data={
+                "items": [{"product_id": 1, "quantity": 60}],
+                "shipping_address": {},
+                "guest_email": "guest@example.com",
+            }, content_type="application/json")
 
-        # Assert
         assert response.status_code == 422
         assert response.json()["code"] == "order_too_large"
 
-    def test_api_returns_400_when_items_list_is_empty(self, client):
-        # Act
-        response = client.post(
-            "/api/orders/",
-            data={"items": [], "shipping_address": {}, "guest_email": "g@example.com"},
-            content_type="application/json",
-        )
+    def test_returns_400_when_items_list_is_empty(self, client):
+        response = client.post(self.url, data={
+            "items": [],
+            "shipping_address": {},
+            "guest_email": "g@example.com",
+        }, content_type="application/json")
 
-        # Assert
         assert response.status_code == 400
 
-    def test_api_returns_400_when_guest_email_missing_for_unauthenticated(self, client):
-        # Act
-        response = client.post(
-            "/api/orders/",
-            data={"items": [{"product_id": 1, "quantity": 1}], "shipping_address": {}},
-            content_type="application/json",
-        )
+    def test_returns_400_when_guest_email_missing_for_unauthenticated(self, client):
+        response = client.post(self.url, data={
+            "items": [{"product_id": 1, "quantity": 1}],
+            "shipping_address": {},
+        }, content_type="application/json")
 
-        # Assert
         assert response.status_code == 400
         assert "guest_email" in response.json()
 
-    def test_api_uses_customer_id_when_authenticated(self, authenticated_client, test_user):
-        # Arrange
+    def test_uses_customer_id_when_authenticated(self, authenticated_client, test_user):
         mock_order = make_mock_order_model()
         with patch("orders.api.views.OrderService") as MockService, \
              patch("orders.api.views.OrderModel.objects") as mock_manager:
@@ -100,16 +89,85 @@ class TestCreateOrderView:
             mock_service.create_order.return_value = MagicMock(id=1)
             mock_manager.prefetch_related.return_value.get.return_value = mock_order
 
-            # Act
-            authenticated_client.post(
-                "/api/orders/",
-                data={
-                    "items": [{"product_id": 1, "quantity": 1}],
-                    "shipping_address": {},
-                },
-                content_type="application/json",
-            )
+            authenticated_client.post(self.url, data={
+                "items": [{"product_id": 1, "quantity": 1}],
+                "shipping_address": {},
+            }, content_type="application/json")
 
-        # Assert
-        call_kwargs = mock_service.create_order.call_args[1]
-        assert call_kwargs["customer_id"] == test_user.customer.id
+        assert mock_service.create_order.call_args[1]["customer_id"] == test_user.customer.id
+
+
+# ---------------------------------------------------------------------------
+# Customer order list
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+class TestCustomerOrderListView:
+    url = "/api/orders/mine/"
+
+    def test_returns_own_orders(self, client, customer):
+        OrderFactory(customer=customer)
+        OrderFactory(customer=customer)
+        client.force_login(customer.user)
+
+        response = client.get(self.url)
+        assert response.status_code == 200
+        assert len(response.json()) == 2
+
+    def test_does_not_return_other_customer_orders(self, client, customer):
+        other_customer = CustomerFactory()
+        OrderFactory(customer=other_customer)
+        client.force_login(customer.user)
+
+        response = client.get(self.url)
+        assert response.json() == []
+
+    def test_returns_403_when_unauthenticated(self, client):
+        response = client.get(self.url)
+        assert response.status_code == 403
+
+
+# ---------------------------------------------------------------------------
+# Customer order detail
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+class TestOrderDetailView:
+    def test_returns_order_for_owner(self, client, customer):
+        order = OrderFactory(customer=customer)
+        client.force_login(customer.user)
+
+        response = client.get(f"/api/orders/{order.pk}/")
+        assert response.status_code == 200
+        assert response.json()["id"] == order.pk
+
+    def test_returns_404_for_other_customer_order(self, client, customer):
+        other_order = OrderFactory(customer=CustomerFactory())
+        client.force_login(customer.user)
+
+        response = client.get(f"/api/orders/{other_order.pk}/")
+        assert response.status_code == 404
+
+    def test_returns_403_when_unauthenticated(self, client):
+        order = OrderFactory()
+        response = client.get(f"/api/orders/{order.pk}/")
+        assert response.status_code == 403
+
+
+# ---------------------------------------------------------------------------
+# Order lines in response
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+class TestOrderLinesInResponse:
+    def test_order_detail_includes_lines(self, client, customer):
+        order = OrderFactory(customer=customer)
+        product = ProductFactory()
+        OrderLineFactory(order=order, product=product, quantity=3)
+        client.force_login(customer.user)
+
+        response = client.get(f"/api/orders/{order.pk}/")
+        assert response.status_code == 200
+        lines = response.json()["lines"]
+        assert len(lines) == 1
+        assert lines[0]["quantity"] == 3
