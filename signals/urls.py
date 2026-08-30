@@ -8,14 +8,20 @@ sitemaps = {"products": ProductSitemap, "categories": CategorySitemap}
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # API
+    # API — customer-facing
     path("api/", include("accounts.api.urls")),
     path("api/", include("catalog.api.urls")),
     path("api/", include("orders.api.urls")),
     path("api/", include("cart.api.urls")),
+    # API — CRM / ops
+    path("api/crm/", include("accounts.api.urls_crm")),
+    path("api/crm/", include("orders.api.urls_crm")),
     # Web templates
     path("", include("pages.urls")),
     path("", include("catalog.urls_web")),
+    path("", include("accounts.urls_web")),
+    path("", include("cart.urls_web")),
+    path("", include("orders.urls_web")),
     # Sitemap
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
 ]
