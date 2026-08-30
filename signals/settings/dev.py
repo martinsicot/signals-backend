@@ -1,8 +1,9 @@
 import environ
-from .base import *  # noqa: F401, F403
+from pathlib import Path
 
-env = environ.Env()
-environ.Env.read_env(BASE_DIR / ".env")  # noqa: F405
+environ.Env.read_env(Path(__file__).resolve().parent.parent.parent / ".env")
+
+from .base import *  # noqa: F401, F403
 
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
