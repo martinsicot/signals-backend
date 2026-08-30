@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Panier — Signals{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-8">Votre panier</h1>
+
+{% if items %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Items -->
+    <div class="lg:col-span-2 space-y-4">
+        {% for item in items %}
+        <div class="border rounded-xl p-4 flex items-center gap-4">
+            <div class="flex-1">
+                <a href="/produits/{{ item.product_slug }}/" class="font-medium hover:text-blue-700">{{ item.product_name }}</a>
+                <p class="text-sm text-gray-500 mt-0.5">{{ item.unit_price }} € l'unité</p>
+            </div>
+
+            <form method="post" action="/panier/modifier/{{ item.product_id }}/" class="flex items-center gap-2">
+                {% csrf_token %}
+                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="50"
+                       class="w-16 border border-gray-300 rounded-lg px-2 py-1.5 text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="text-xs text-gray-500 hover:text-blue-700 underline">Mettre à jour</button>
+            </form>
+
+            <p class="font-semibold w-20 text-right">{{ item.total_price }} €</p>
+
+            <form method="post" action="/panier/supprimer/{{ item.product_id }}/">
+                {% csrf_token %}
+                <button type="submit" class="text-gray-400 hover:text-red-600 transition" title="Supprimer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Summary -->
+    <div class="border rounded-xl p-6 h-fit space-y-3 text-sm">
+        <h2 class="font-semibold text-base mb-2">Récapitulatif</h2>
+        <div class="flex justify-between">
+            <span class="text-gray-500">Sous-total</span>
+            <span>{{ subtotal }} €</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-500">Livraison</span>
+            <span>{% if shipping_fee == 0 %}Offerte{% else %}{{ shipping_fee }} €{% endif %}</span>
+        </div>
+        {% if shipping_fee > 0 %}
+        <p class="text-xs text-gray-400">Livraison offerte dès {{ free_threshold }} € d'achat</p>
+        {% endif %}
+        <div class="border-t pt-3 flex justify-between font-semibold text-base">
+            <span>Total</span>
+            <span>{{ total }} €</span>
+        </div>
+        <a href="/commande/" class="block w-full text-center bg-blue-700 text-white py-2.5 rounded-lg font-medium hover:bg-blue-800 transition mt-2">
+            Commander →
+        </a>
+        <a href="/catalogue/" class="block text-center text-sm text-gray-500 hover:text-blue-700 mt-1">Continuer mes achats</a>
+    </div>
+</div>
+
+{% else %}
+<div class="text-center py-20 text-gray-400">
+    <p class="text-lg mb-4">Votre panier est vide.</p>
+    <a href="/catalogue/" class="text-blue-700 hover:underline">Voir le catalogue →</a>
+</div>
+{% endif %}
+{% endblock %}

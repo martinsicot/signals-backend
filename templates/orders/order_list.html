@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Mes commandes — Signals{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-8">Mes commandes</h1>
+
+{% if orders %}
+<div class="space-y-4">
+    {% for order in orders %}
+    <a href="/mes-commandes/{{ order.id }}/" class="block border rounded-xl p-5 hover:shadow-sm transition">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="font-medium">Commande n°{{ order.id }}</p>
+                <p class="text-sm text-gray-500 mt-0.5">{{ order.created_at|date:"d/m/Y" }}</p>
+            </div>
+            <span class="text-xs px-2.5 py-1 rounded-full font-medium
+                {% if order.status == 'paid' %}bg-green-100 text-green-800
+                {% elif order.status == 'shipped' %}bg-blue-100 text-blue-800
+                {% elif order.status == 'delivered' %}bg-gray-100 text-gray-800
+                {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                {{ order.get_status_display }}
+            </span>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">{{ order.lines.count }} article{{ order.lines.count|pluralize }}</p>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-20 text-gray-400">
+    <p class="mb-4">Vous n'avez pas encore de commande.</p>
+    <a href="/catalogue/" class="text-blue-700 hover:underline">Voir le catalogue →</a>
+</div>
+{% endif %}
+{% endblock %}

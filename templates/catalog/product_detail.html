@@ -77,16 +77,16 @@
         </div>
 
         <!-- Add to cart — htmx -->
-        <div class="flex items-center gap-3"
-             hx-on:htmx:after-request="document.body.dispatchEvent(new Event('cart-updated')); showAddedFeedback()">
+        <div class="flex items-center gap-3">
             <input type="number" id="qty" name="quantity" value="1" min="1" max="50"
                    class="w-20 border border-gray-300 rounded-lg px-3 py-2.5 text-center focus:outline-none focus:ring-2 focus:ring-blue-500">
             <button
-                id="add-btn"
-                hx-post="/api/cart/add/"
-                hx-vals='js:{"product_id": {{ product.id }}, "quantity": parseInt(document.getElementById("qty").value)}'
+                hx-post="/panier/ajouter/"
+                hx-vals='js:{"product_id": {{ product.id }}, "quantity": parseInt(document.getElementById("qty").value), "csrfmiddlewaretoken": "{{ csrf_token }}"}'
                 hx-trigger="click"
-                hx-swap="none"
+                hx-target="#cart-count"
+                hx-swap="outerHTML"
+                hx-on:htmx:after-request="showAddedFeedback()"
                 class="flex-1 bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-800 transition">
                 Ajouter au panier
             </button>
