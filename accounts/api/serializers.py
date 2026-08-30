@@ -1,5 +1,8 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from ..models import Customer, Address
+
+User = get_user_model()
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -20,6 +23,16 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ["id", "email", "first_name", "last_name", "phone", "addresses"]
+
+
+class StaffUserSerializer(serializers.ModelSerializer):
+    """Returned on login/me for crm and ops users (no Customer record)."""
+
+    groups = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
+
+    class Meta:
+        model = User
+        fields = ["id", "email", "first_name", "last_name", "groups", "is_staff"]
 
 
 class RegisterSerializer(serializers.Serializer):

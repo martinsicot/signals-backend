@@ -1,14 +1,16 @@
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.models import Group
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
-from .serializers import CustomerSerializer, RegisterSerializer, AddressSerializer
+from .serializers import CustomerSerializer, RegisterSerializer, AddressSerializer, StaffUserSerializer
 from ..models import Customer, Address
+from ..permissions import IsCustomer
 
 User = get_user_model()
 
@@ -29,12 +31,14 @@ class RegisterView(APIView):
             )
 
         user = User.objects.create_user(
-            username=data["email"],
             email=data["email"],
             password=data["password"],
             first_name=data["first_name"],
             last_name=data["last_name"],
         )
+        customer_group = Group.objects.filter(name="customer").first()
+        if customer_group:
+            user.groups.add(customer_group)
         customer = Customer.objects.create(user=user, phone=data.get("phone", ""))
         login(request, user)
         return Response(CustomerSerializer(customer).data, status=status.HTTP_201_CREATED)
@@ -46,11 +50,13 @@ class LoginView(APIView):
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
-        user = authenticate(request, username=email, password=password)
+        user = authenticate(request, email=email, password=password)
         if user is None:
             return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
         login(request, user)
-        return Response(CustomerSerializer(user.customer).data)
+        if hasattr(user, "customer"):
+            return Response(CustomerSerializer(user.customer).data)
+        return Response(StaffUserSerializer(user).data)
 
 
 class LogoutView(APIView):
@@ -63,11 +69,13 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response(CustomerSerializer(request.user.customer).data)
+        if hasattr(request.user, "customer"):
+            return Response(CustomerSerializer(request.user.customer).data)
+        return Response(StaffUserSerializer(request.user).data)
 
 
 class AddressListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCustomer]
 
     def get(self, request):
         addresses = request.user.customer.addresses.all()
