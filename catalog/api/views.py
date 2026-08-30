@@ -22,7 +22,8 @@ class ProductListView(APIView):
 
     def get(self, request):
         category_slug = request.query_params.get("category")
-        products = product_repo.list_active(category_slug=category_slug)
+        q = request.query_params.get("q", "").strip() or None
+        products = product_repo.list_active(category_slug=category_slug, q=q)
         return Response(ProductListSerializer(products, many=True).data)
 
 
