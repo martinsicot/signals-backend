@@ -1,79 +1,144 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {% if current_category %}{{ current_category.meta_title|default:current_category.name }} — Signals{% else %}Catalogue — Signals{% endif %}
+    {% if current_category %}{{ current_category.meta_title|default:current_category.name }} — Signals{% else %}Catalogue — Panneaux de signalisation — Signals{% endif %}
 {% endblock %}
 
 {% block meta_description %}
-    {% if current_category %}{{ current_category.meta_description|default:current_category.description|truncatechars:160 }}{% else %}Catalogue de panneaux de signalisation routière. Achat en ligne, livraison en France.{% endif %}
+    {% if current_category %}{{ current_category.meta_description|default:current_category.description|truncatechars:160 }}{% else %}Catalogue complet de panneaux de signalisation routière conformes aux normes françaises. Livraison en France.{% endif %}
 {% endblock %}
 
 {% block content %}
+
+<!-- Page header -->
+<div class="mb-6">
+    <h1 class="text-2xl font-bold">
+        {% if current_category %}{{ current_category.name }}{% else %}Catalogue{% endif %}
+    </h1>
+    {% if current_category and current_category.description %}
+    <p class="text-gray-500 text-sm mt-1">{{ current_category.description }}</p>
+    {% endif %}
+</div>
+
+<!-- Search bar — mobile -->
+<form action="/catalogue/" method="get" class="md:hidden mb-5">
+    {% if current_category %}<input type="hidden" name="category" value="{{ current_category.slug }}">{% endif %}
+    <div class="relative">
+        <input type="search" name="q" placeholder="Rechercher dans le catalogue…"
+               value="{{ request.GET.q }}"
+               class="w-full border border-gray-200 bg-gray-50 rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-700">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
+        </button>
+    </div>
+</form>
+
 <div class="flex gap-8">
+
     <!-- Sidebar -->
-    <aside class="w-44 shrink-0 hidden md:block">
-        <h2 class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3">Catégories</h2>
-        <ul class="space-y-1">
+    <aside class="w-48 shrink-0 hidden md:block">
+        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Catégories</p>
+        <ul class="space-y-0.5">
             <li>
                 <a href="/catalogue/"
-                   class="block px-2 py-1.5 rounded text-sm {% if not current_category %}text-blue-700 font-semibold bg-blue-50{% else %}text-gray-600 hover:text-blue-700{% endif %}">
-                    Tous les produits
+                   class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition
+                       {% if not current_category %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                    <span>Tous les produits</span>
                 </a>
             </li>
             {% for cat in categories %}
             <li>
                 <a href="/catalogue/{{ cat.slug }}/"
-                   class="block px-2 py-1.5 rounded text-sm {% if current_category.slug == cat.slug %}text-blue-700 font-semibold bg-blue-50{% else %}text-gray-600 hover:text-blue-700{% endif %}">
-                    {{ cat.name }}
+                   class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition
+                       {% if current_category.slug == cat.slug %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                    <span>{{ cat.name }}</span>
                 </a>
             </li>
             {% endfor %}
         </ul>
+
+        <!-- Search — desktop sidebar -->
+        <div class="mt-8">
+            <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Recherche</p>
+            <form action="/catalogue/" method="get">
+                {% if current_category %}<input type="hidden" name="category" value="{{ current_category.slug }}">{% endif %}
+                <div class="relative">
+                    <input type="search" name="q" placeholder="Mot-clé…"
+                           value="{{ request.GET.q }}"
+                           class="w-full border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
+                    </button>
+                </div>
+            </form>
+        </div>
     </aside>
 
     <!-- Products -->
-    <div class="flex-1">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-xl font-semibold">
-                {% if current_category %}{{ current_category.name }}{% else %}Tous les produits{% endif %}
-            </h1>
-            <p class="text-sm text-gray-500">{{ paginator.count }} produit{{ paginator.count|pluralize }}</p>
+    <div class="flex-1 min-w-0">
+
+        <!-- Results count + active search -->
+        <div class="flex items-center justify-between mb-5 text-sm text-gray-500">
+            <p>
+                {{ paginator.count }} produit{{ paginator.count|pluralize }}
+                {% if request.GET.q %} pour &laquo;&nbsp;<span class="font-medium text-gray-800">{{ request.GET.q }}</span>&nbsp;&raquo;{% endif %}
+            </p>
+            {% if request.GET.q %}
+            <a href="/catalogue/{% if current_category %}{{ current_category.slug }}/{% endif %}" class="text-blue-700 hover:underline">
+                Effacer la recherche ✕
+            </a>
+            {% endif %}
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {% for product in products %}
-            <a href="/produits/{{ product.slug }}/" class="group border rounded-lg overflow-hidden hover:shadow-md transition">
+            <a href="/produits/{{ product.slug }}/"
+               class="group border border-gray-200 rounded-xl overflow-hidden hover:shadow-md hover:border-blue-200 transition flex flex-col">
                 {% if product.image %}
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-44 object-contain p-4 bg-gray-50">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                     class="w-full h-44 object-contain p-4 bg-gray-50">
                 {% else %}
                 <div class="w-full h-44 bg-gray-100 flex items-center justify-center">
-                    <span class="text-gray-400 text-xs">Pas d'image</span>
+                    <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 </div>
                 {% endif %}
-                <div class="p-4">
-                    <h2 class="text-sm font-medium group-hover:text-blue-700 leading-snug">{{ product.name }}</h2>
-                    {% if product.dimensions %}<p class="text-xs text-gray-400 mt-1">{{ product.dimensions }}</p>{% endif %}
-                    <p class="font-semibold mt-2">{{ product.price }} €</p>
+                <div class="p-4 flex flex-col flex-1">
+                    <p class="text-sm font-medium leading-snug group-hover:text-blue-700 transition flex-1">{{ product.name }}</p>
+                    {% if product.dimensions %}
+                    <p class="text-xs text-gray-400 mt-1">{{ product.dimensions }}</p>
+                    {% endif %}
+                    <div class="flex items-center justify-between mt-3">
+                        <p class="font-bold text-gray-900">{{ product.price }} €</p>
+                        <span class="text-xs text-gray-400">TTC</span>
+                    </div>
                 </div>
             </a>
             {% empty %}
-            <div class="col-span-3 py-12 text-center text-gray-400">
-                Aucun produit dans cette catégorie.
+            <div class="col-span-3 py-16 text-center text-gray-400">
+                <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
+                <p class="text-sm">Aucun produit trouvé.</p>
+                {% if request.GET.q %}
+                <a href="/catalogue/" class="text-blue-700 hover:underline text-sm mt-2 inline-block">Voir tous les produits</a>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
 
+        <!-- Pagination -->
         {% if is_paginated %}
         <div class="flex justify-center items-center gap-2 mt-10">
             {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 border rounded hover:bg-gray-50 text-sm">← Précédent</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+               class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-600">← Précédent</a>
             {% endif %}
-            <span class="text-sm text-gray-500">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            <span class="text-sm text-gray-500 px-2">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 border rounded hover:bg-gray-50 text-sm">Suivant →</a>
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+               class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-600">Suivant →</a>
             {% endif %}
         </div>
         {% endif %}
+
     </div>
 </div>
 {% endblock %}

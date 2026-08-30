@@ -1,26 +1,84 @@
 {% extends "base.html" %}
 
 {% block title %}Signals — Panneaux de signalisation routière en ligne{% endblock %}
+{% block meta_description %}Achetez vos panneaux de signalisation routière conformes aux normes françaises. Livraison en France sous 5 jours ouvrés. Devis gratuit pour les collectivités.{% endblock %}
 
 {% block content %}
+
 <!-- Hero -->
-<section class="text-center py-16 border-b border-gray-100 mb-12">
-    <h1 class="text-4xl font-bold mb-4 text-gray-900">Panneaux de signalisation<br>livrés en France</h1>
-    <p class="text-gray-500 text-lg mb-8 max-w-xl mx-auto">Conformes aux normes françaises. Fabrication aluminium. Délai 3 jours ouvrés. Livraison offerte dès 200 €.</p>
-    <a href="/catalogue/" class="inline-block bg-blue-700 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-800 transition">
-        Voir le catalogue
-    </a>
+<section class="relative -mx-4 -mt-8 px-4 pt-16 pb-14 bg-gradient-to-br from-blue-700 to-blue-900 text-white overflow-hidden mb-14">
+    <!-- Background pattern -->
+    <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%); background-size: 20px 20px;"></div>
+
+    <div class="relative max-w-2xl">
+        <div class="inline-flex items-center gap-2 bg-blue-600 bg-opacity-60 text-blue-100 text-xs font-medium px-3 py-1 rounded-full mb-5">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-400 inline-block"></span>
+            Fabrication sous 3 jours ouvrés
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold leading-tight mb-4">
+            Panneaux de signalisation<br>livrés partout en France
+        </h1>
+        <p class="text-blue-100 text-lg mb-8 leading-relaxed max-w-lg">
+            Conformes aux normes françaises. Aluminium haute résistance. Particuliers, chantiers et collectivités.
+        </p>
+        <div class="flex flex-wrap gap-3">
+            <a href="/catalogue/" class="bg-white text-blue-700 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition text-sm">
+                Voir le catalogue →
+            </a>
+            <a href="/catalogue/" class="border border-blue-400 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-800 transition text-sm">
+                Demander un devis
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Trust strip -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-14">
+    <div class="flex items-start gap-4 border border-gray-100 rounded-xl p-5 bg-gray-50">
+        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <div>
+            <p class="font-semibold text-sm">Normes françaises</p>
+            <p class="text-gray-500 text-xs mt-0.5">Conformes à la réglementation routière en vigueur (NF EN 12899)</p>
+        </div>
+    </div>
+    <div class="flex items-start gap-4 border border-gray-100 rounded-xl p-5 bg-gray-50">
+        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+            <p class="font-semibold text-sm">Fabrication en 3 jours</p>
+            <p class="text-gray-500 text-xs mt-0.5">Délai standard à réception de commande, expédié le jour même</p>
+        </div>
+    </div>
+    <div class="flex items-start gap-4 border border-gray-100 rounded-xl p-5 bg-gray-50">
+        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+        </div>
+        <div>
+            <p class="font-semibold text-sm">Livraison offerte dès 200 €</p>
+            <p class="text-gray-500 text-xs mt-0.5">En France métropolitaine, suivi de colis inclus</p>
+        </div>
+    </div>
 </section>
 
 <!-- Categories -->
 {% if categories %}
-<section class="mb-12">
-    <h2 class="text-xl font-semibold mb-6">Parcourir par catégorie</h2>
+<section class="mb-14">
+    <div class="flex justify-between items-end mb-6">
+        <h2 class="text-xl font-bold">Parcourir par catégorie</h2>
+        <a href="/catalogue/" class="text-sm text-blue-700 hover:underline">Tout voir →</a>
+    </div>
     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
         {% for cat in categories %}
-        <a href="/catalogue/{{ cat.slug }}/" class="border rounded-lg p-6 hover:border-blue-700 hover:shadow-sm transition text-center group">
-            <span class="font-medium group-hover:text-blue-700">{{ cat.name }}</span>
-            {% if cat.description %}<p class="text-sm text-gray-500 mt-1">{{ cat.description }}</p>{% endif %}
+        <a href="/catalogue/{{ cat.slug }}/"
+           class="group border border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:bg-blue-50 transition">
+            <p class="font-semibold text-sm group-hover:text-blue-700 transition">{{ cat.name }}</p>
+            {% if cat.description %}
+            <p class="text-xs text-gray-500 mt-1 leading-relaxed">{{ cat.description|truncatechars:60 }}</p>
+            {% endif %}
+            <p class="text-xs text-blue-700 mt-3 font-medium group-hover:underline">Voir les produits →</p>
         </a>
         {% endfor %}
     </div>
@@ -29,25 +87,25 @@
 
 <!-- Featured products -->
 {% if featured_products %}
-<section>
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-semibold">Produits populaires</h2>
+<section class="mb-14">
+    <div class="flex justify-between items-end mb-6">
+        <h2 class="text-xl font-bold">Produits populaires</h2>
         <a href="/catalogue/" class="text-sm text-blue-700 hover:underline">Voir tout →</a>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {% for product in featured_products %}
-        <a href="/produits/{{ product.slug }}/" class="group border rounded-lg overflow-hidden hover:shadow-md transition">
+        <a href="/produits/{{ product.slug }}/" class="group border border-gray-200 rounded-xl overflow-hidden hover:shadow-md hover:border-blue-200 transition">
             {% if product.image %}
             <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-40 object-contain p-4 bg-gray-50">
             {% else %}
             <div class="w-full h-40 bg-gray-100 flex items-center justify-center">
-                <span class="text-gray-400 text-xs">Panneau</span>
+                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
             {% endif %}
             <div class="p-4">
-                <h3 class="text-sm font-medium group-hover:text-blue-700 leading-snug">{{ product.name }}</h3>
-                {% if product.dimensions %}<p class="text-xs text-gray-400 mt-1">{{ product.dimensions }}</p>{% endif %}
-                <p class="font-semibold mt-2">{{ product.price }} €</p>
+                <p class="text-sm font-medium leading-snug group-hover:text-blue-700 transition">{{ product.name }}</p>
+                {% if product.dimensions %}<p class="text-xs text-gray-400 mt-0.5">{{ product.dimensions }}</p>{% endif %}
+                <p class="font-bold mt-2 text-gray-900">{{ product.price }} €</p>
             </div>
         </a>
         {% endfor %}
@@ -55,22 +113,16 @@
 </section>
 {% endif %}
 
-<!-- Trust signals -->
-<section class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 py-10 border-t border-gray-100">
-    <div class="text-center">
-        <p class="text-2xl mb-2">🏭</p>
-        <h3 class="font-semibold text-sm">Fabrication aluminium</h3>
-        <p class="text-gray-500 text-xs mt-1">Normes françaises et européennes</p>
+<!-- Municipalities CTA -->
+<section class="rounded-2xl bg-gray-900 text-white px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+    <div>
+        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Collectivités & mairies</p>
+        <h2 class="text-xl font-bold mb-2">Vous gérez une commune ou un chantier ?</h2>
+        <p class="text-gray-400 text-sm max-w-md">Commandes en volume, facturation adaptée et suivi dédié. Contactez-nous pour un devis personnalisé.</p>
     </div>
-    <div class="text-center">
-        <p class="text-2xl mb-2">⏱</p>
-        <h3 class="font-semibold text-sm">3 jours ouvrés</h3>
-        <p class="text-gray-500 text-xs mt-1">Délai de fabrication standard</p>
-    </div>
-    <div class="text-center">
-        <p class="text-2xl mb-2">🚚</p>
-        <h3 class="font-semibold text-sm">Livraison offerte</h3>
-        <p class="text-gray-500 text-xs mt-1">Dès 200 € d'achat</p>
-    </div>
+    <a href="mailto:contact@signals.fr" class="shrink-0 bg-white text-gray-900 font-semibold px-6 py-3 rounded-xl hover:bg-gray-100 transition text-sm">
+        Demander un devis →
+    </a>
 </section>
+
 {% endblock %}
