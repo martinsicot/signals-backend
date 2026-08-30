@@ -24,6 +24,7 @@ dev = [
     "pytest-cov>=5.0",
     "ipython>=8.0",
     "django-debug-toolbar>=4.4",
+    "factory-boy>=3.3.3",
 ]
 
 [tool.pytest.ini_options]

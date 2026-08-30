@@ -1,22 +1,23 @@
 import pytest
-from django.contrib.auth import get_user_model
-from accounts.models import Customer, Address
-from catalog.models import Category, Product
 
-User = get_user_model()
+from tests.factories import (
+    CategoryFactory,
+    CRMUserFactory,
+    CustomerFactory,
+    OpsUserFactory,
+    ProductFactory,
+)
+
+
+@pytest.fixture
+def customer(db):
+    return CustomerFactory()
 
 
 @pytest.fixture
 def test_user(db):
-    user = User.objects.create_user(
-        username="test@example.com",
-        email="test@example.com",
-        password="testpassword123",
-        first_name="Jean",
-        last_name="Dupont",
-    )
-    Customer.objects.create(user=user)
-    return user
+    """Customer user — kept for backward compat with existing tests."""
+    return CustomerFactory().user
 
 
 @pytest.fixture
@@ -26,16 +27,37 @@ def authenticated_client(client, test_user):
 
 
 @pytest.fixture
+def crm_user(db):
+    return CRMUserFactory()
+
+
+@pytest.fixture
+def crm_client(client, crm_user):
+    client.force_login(crm_user)
+    return client
+
+
+@pytest.fixture
+def ops_user(db):
+    return OpsUserFactory()
+
+
+@pytest.fixture
+def ops_client(client, ops_user):
+    client.force_login(ops_user)
+    return client
+
+
+@pytest.fixture
 def test_category(db):
-    return Category.objects.create(name="Road Signs", slug="road-signs")
+    return CategoryFactory(name="Road Signs", slug="road-signs")
 
 
 @pytest.fixture
 def test_product(db, test_category):
-    return Product.objects.create(
+    return ProductFactory(
         category=test_category,
         name="Stop Sign",
         slug="stop-sign",
         price="49.90",
-        is_active=True,
     )
