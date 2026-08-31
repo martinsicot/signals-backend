@@ -4,7 +4,10 @@ from .base import *  # noqa: F401, F403
 env = environ.Env()
 
 DEBUG = False
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
+
+_allowed = env.list("DJANGO_ALLOWED_HOSTS", default=[])
+_render_host = env("RENDER_EXTERNAL_HOSTNAME", default="")
+ALLOWED_HOSTS = list(filter(None, _allowed + ([_render_host] if _render_host else [])))
 
 SECURE_SSL_REDIRECT = True
 SECURE_HSTS_SECONDS = 31536000

@@ -18,4 +18,4 @@ RUN uv run python manage.py collectstatic --no-input --settings=signals.settings
 
 EXPOSE 8000
 
-CMD ["uv", "run", "gunicorn", "signals.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "60"]
+CMD ["sh", "-c", "uv run python manage.py migrate --no-input && uv run gunicorn signals.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 60"]
