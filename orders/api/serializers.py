@@ -39,8 +39,8 @@ class CreateOrderSerializer(serializers.Serializer):
 
     def validate_items(self, items):
         for item in items:
-            if "product_id" not in item:
-                raise serializers.ValidationError("Each item must have a product_id.")
+            if "variant_id" not in item:
+                raise serializers.ValidationError("Each item must have a variant_id.")
             if "quantity" not in item or int(item["quantity"]) < 1:
                 raise serializers.ValidationError("Each item must have a quantity >= 1.")
         return items

@@ -20,10 +20,10 @@ class OrderService:
     ) -> Order:
         lines = [
             OrderLine(
-                product_id=item["product_id"],
-                product_name=self.product_repo.get_by_id(item["product_id"]).name,
+                variant_id=item["variant_id"],
+                product_name=self.product_repo.get_variant_by_id(item["variant_id"]).display_name,
                 quantity=int(item["quantity"]),
-                unit_price=self.product_repo.get_price(item["product_id"]),
+                unit_price=self.product_repo.get_variant_price(item["variant_id"]),
             )
             for item in cart_items
         ]

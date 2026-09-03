@@ -43,7 +43,7 @@ class OrderModel(models.Model):
 
 class OrderLineModel(models.Model):
     order = models.ForeignKey(OrderModel, on_delete=models.CASCADE, related_name="lines")
-    product = models.ForeignKey("catalog.Product", on_delete=models.PROTECT)
+    product = models.ForeignKey("catalog.ProductVariant", on_delete=models.PROTECT, related_name="order_lines")
     product_name_snapshot = models.CharField(max_length=300)
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=8, decimal_places=2)

@@ -1,140 +1,104 @@
 """
-Management command: import traffic sign panels from Produits.txt.
+Management command: import product catalog from data/produits.json.
 
-Source file format: TSV (Latin-1), columns: Code / Libellé / Prix
-Only rows with prefix AP, ADP, PV or RP are imported (assembled panels).
-Films (AF, RF, ADF), tôles (AT, RT, ADT) and accessories are skipped.
-
-Code anatomy:  {LINE}-{SIGN_CODE} {SIZE}[-{CLASS}]
-  LINE      AP = Allegro, ADP = Adagio, PV = Panneau Volet, RP = Rondo
-  SIGN_CODE French sign identity: B4, A13A, AB3A, CE15A …  (stored in sign_code)
-  SIZE      single mm value (700) or W×H (400X1000)
-  CLASS     CL1 or CL2 (reflectivity class)
-
-Categories are derived from the sign series (A, AB, AK, B, BK, C, CE, CK …).
+Each JSON entry is a product family (base_code). Its `declinaisons` are the
+purchasable variants and map to ProductVariant rows. Attributes (Taille, Classe,
+Finition, Fixations) are extracted from each déclinaison and linked via
+ProductVariantAttribute.
 
 Options:
-  --file PATH   override source (default: Produits.txt, next to manage.py)
-  --clear       delete all existing Category + Product rows before importing
-  --dry-run     parse and count without writing to DB
+  --file PATH   override JSON source (default: data/produits.json)
+  --clear       delete all existing data before importing
+  --dry-run     parse and report counts without writing to DB
 """
 
+import json
 import re
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 from django.utils.text import slugify
 
-from catalog.models import Category, Product
-
-
-PANEL_PREFIXES = {"AP", "ADP", "PV", "RP"}
-
-LINE_LABELS = {
-    "AP": "Allegro",
-    "ADP": "Adagio",
-    "PV": "Panneau Volet",
-    "RP": "Rondo",
-}
-
-# Ordered longest-first so AB/AK/BK/CE/CK/EB are matched before A/B/C/E
-SERIES_PREFIXES = ["AK", "AB", "BK", "CE", "CK", "EB"]
-
-SERIES_NAMES = {
-    "A": "Panneaux de danger",
-    "AB": "Panneaux de priorité",
-    "AK": "Signalisation temporaire — Danger",
-    "B": "Panneaux d'interdiction et d'obligation",
-    "BK": "Signalisation temporaire — Réglementation",
-    "C": "Panneaux de direction",
-    "CE": "Panneaux de direction spéciaux",
-    "CK": "Signalisation temporaire — Direction",
-    "D": "Panneaux de service",
-    "E": "Panneaux de localisation",
-    "EB": "Balises et bornes",
-    "J": "Panneaux J",
-    "K": "Panneaux K",
-    "M": "Panneaux M",
-    "S": "Panneaux S",
-}
-
-# Handles three separator styles found in the file:
-#   AP-B4 700-CL2          (hyphen before CL)
-#   ADP-D21 1000X250 CL2   (space before CL)
-#   RP-AK14 TRIFLASH 1000-CL1  (variant word between sign and size)
-#   AP-C 500X300-CL1 ASSEMBLY POINT  (trailing text after CL, ignored)
-# No $ anchor so trailing text is silently ignored.
-_CODE_RE = re.compile(
-    r"^(?P<line>[A-Z]+)-(?P<sign>[^\s]+)\s+(?:[A-Z]+\s+)?(?P<size>[\dX]+)(?:[\s-](?P<cls>CL\d+))?",
-    re.IGNORECASE,
+from catalog.models import (
+    Attribute,
+    AttributeValue,
+    Category,
+    Product,
+    ProductVariant,
+    ProductVariantAttribute,
 )
 
-MAX_SLUG = 80
+FINITION_DISPLAY = {
+    "ACIER": "Acier",
+    "ALU": "Aluminium",
+    "BRUT": "Brut",
+    "FEZN": "FeZn",
+    "GALVA": "Galvanisé",
+    "GALVANF": "Galvanisé NF",
+    "INOX": "Inox",
+    "LAQUE": "Laqué",
+    "LED": "LED",
+    "PEINTURE": "Peinture",
+    "SENDZIMIR": "Sendzimir",
+    "SOLAR": "Solaire",
+}
+
+CLASSE_DISPLAY = {
+    "CL1": "Classe 1",
+    "CL2": "Classe 2",
+    "CL3": "Classe 3",
+}
+
+MAX_SLUG = 120
+BATCH_SIZE = 500
 
 
-def _parse_price(raw: str) -> Decimal | None:
-    cleaned = raw.strip().replace(",", ".")
-    if not cleaned:
-        return None
-    try:
-        return Decimal(cleaned)
-    except InvalidOperation:
-        return None
-
-
-def _get_series(sign_code: str) -> str:
-    upper = sign_code.upper()
-    for prefix in SERIES_PREFIXES:
-        if upper.startswith(prefix):
-            return prefix
-    return upper[0]
-
-
-def _build_dimensions(size_str: str) -> str:
-    upper = size_str.upper()
-    if "X" in upper:
-        w, h = upper.split("X", 1)
-        return f"{w}×{h} mm"
-    return f"{size_str} mm"
-
-
-def _build_name(sign_code: str, size_str: str, cls: str | None) -> str:
-    parts = [f"Panneau {sign_code.upper()}", _build_dimensions(size_str)]
-    if cls:
-        num = cls.upper().lstrip("CL")
-        parts.append(f"Classe {num}")
-    return " — ".join(parts)
-
-
-def _build_slug(line: str, sign_code: str, size_str: str, cls: str | None, seen: set) -> str:
-    raw = f"{line}-{sign_code}-{size_str}"
-    if cls:
-        raw += f"-{cls}"
-    base = slugify(raw)[:MAX_SLUG]
+def _slug(raw: str, seen: set, max_len: int = MAX_SLUG) -> str:
+    base = slugify(re.sub(r"['\"/]", "-", raw))[:max_len]
+    if not base:
+        base = "item"
     candidate = base
     counter = 2
     while candidate in seen:
         suffix = f"-{counter}"
-        candidate = base[: MAX_SLUG - len(suffix)] + suffix
+        candidate = base[: max_len - len(suffix)] + suffix
         counter += 1
     seen.add(candidate)
     return candidate
 
 
+def _taille(decl: dict) -> tuple[str, str, str] | None:
+    """Returns (value, display, slug) for the Taille attribute, or None."""
+    h = decl.get("hauteur_mm")
+    w = decl.get("largeur_mm")
+    d = decl.get("diametre_mm")
+    dim = decl.get("dimension_mm")
+
+    if h and w:
+        val = f"{w}x{h}"
+        return val, f"{w}×{h} mm", slugify(val)
+    if d:
+        return f"o{d}", f"Ø{d} mm", f"diam-{d}"
+    if dim:
+        return str(dim), f"{dim} mm", slugify(str(dim))
+    return None
+
+
 class Command(BaseCommand):
-    help = "Import traffic sign panels from Produits.txt"
+    help = "Import product catalog from data/produits.json"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--file",
-            default="Produits.txt",
-            help="Path to the TSV source file (default: Produits.txt next to manage.py)",
+            default="data/produits.json",
+            help="Path to the JSON source file (default: data/produits.json)",
         )
         parser.add_argument(
             "--clear",
             action="store_true",
-            help="Delete all existing Category and Product rows before importing",
+            help="Delete all existing catalog data before importing",
         )
         parser.add_argument(
             "--dry-run",
@@ -144,129 +108,172 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         source = Path(options["file"])
-        if not source.is_absolute():
-            source = Path.cwd() / source
         if not source.exists():
             raise CommandError(f"File not found: {source}")
 
         dry_run = options["dry_run"]
         prefix = "[DRY RUN] " if dry_run else ""
 
-        rows = []
-        skipped_unparseable = 0
-        with open(source, encoding="latin-1") as fh:
-            for i, line in enumerate(fh):
-                if i == 0:
-                    continue  # header
-                parts = line.rstrip("\n").split("\t")
-                if len(parts) < 2:
-                    continue
-                code = parts[0].strip()
-                price_raw = parts[2].strip() if len(parts) > 2 else ""
+        with open(source, encoding="utf-8") as fh:
+            data = json.load(fh)
 
-                line_prefix = code.split("-")[0].upper()
-                if line_prefix not in PANEL_PREFIXES:
-                    continue
-
-                m = _CODE_RE.match(code)
-                if not m:
-                    skipped_unparseable += 1
-                    continue
-
-                rows.append({
-                    "code": code,
-                    "price_raw": price_raw,
-                    "line": m.group("line").upper(),
-                    "sign_code": m.group("sign").upper(),
-                    "size_str": m.group("size").upper(),
-                    "cls": m.group("cls").upper() if m.group("cls") else None,
-                })
-
-        self.stdout.write(
-            f"{prefix}Parsed {len(rows)} panel rows from {source.name}"
-            + (f" ({skipped_unparseable} skipped — unparseable code)" if skipped_unparseable else "")
-        )
+        self.stdout.write(f"{prefix}Loaded {len(data)} product families from {source}")
 
         if options["clear"] and not dry_run:
-            deleted_p = Product.objects.all().delete()[0]
-            deleted_c = Category.objects.all().delete()[0]
-            self.stdout.write(
-                self.style.WARNING(f"Cleared {deleted_p} products and {deleted_c} categories.")
-            )
-
-        # --- categories: one per sign series ---
-        series_set = {_get_series(r["sign_code"]) for r in rows}
-        category_map: dict[str, Category] = {}
-
-        for series in sorted(series_set):
-            cat_name = SERIES_NAMES.get(series, f"Panneaux {series}")
-            cat_slug = slugify(f"panneaux-{series.lower()}")
-            if not dry_run:
-                cat, created = Category.objects.update_or_create(
-                    slug=cat_slug,
-                    defaults={"name": cat_name},
-                )
-                category_map[series] = cat
-                if created:
-                    self.stdout.write(f"  Created category: {cat_name}")
-            else:
-                self.stdout.write(f"  {prefix}Category: {cat_name}")
-
-        # --- products ---
-        seen_slugs: set[str] = set()
-        if not dry_run:
-            seen_slugs = set(Product.objects.values_list("slug", flat=True))
-
-        created_count = 0
-        updated_count = 0
-        no_price_count = 0
-
-        for row in rows:
-            price = _parse_price(row["price_raw"])
-            if price is None:
-                no_price_count += 1
-                price = Decimal("0.00")
-
-            series = _get_series(row["sign_code"])
-            slug = _build_slug(
-                row["line"], row["sign_code"], row["size_str"], row["cls"], seen_slugs
-            )
-            name = _build_name(row["sign_code"], row["size_str"], row["cls"])
-            dimensions = _build_dimensions(row["size_str"])
-            material = f"Classe {row['cls'].lstrip('CL')}" if row["cls"] else ""
-
-            defaults = {
-                "name": name,
-                "sign_code": row["sign_code"],
-                "price": price,
-                "is_active": price > 0,
-                "dimensions": dimensions,
-                "material": material,
-                "description": LINE_LABELS.get(row["line"], row["line"]),
-            }
-
-            if not dry_run:
-                _, was_created = Product.objects.update_or_create(
-                    slug=slug,
-                    defaults={"category": category_map[series], **defaults},
-                )
-                if was_created:
-                    created_count += 1
-                else:
-                    updated_count += 1
+            ProductVariantAttribute.objects.all().delete()
+            ProductVariant.objects.all().delete()
+            Product.objects.all().delete()
+            Category.objects.all().delete()
+            AttributeValue.objects.all().delete()
+            Attribute.objects.all().delete()
+            self.stdout.write(self.style.WARNING("Cleared all catalog data."))
 
         if dry_run:
+            total_decl = sum(len(f.get("declinaisons", [])) for f in data)
+            no_price = sum(
+                1 for f in data
+                for d in f.get("declinaisons", [])
+                if d.get("prix") is None
+            )
+            gammes = {f["gamme"] for f in data}
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"\n{prefix}Would import {len(rows)} panels across "
-                    f"{len(series_set)} categories. "
-                    f"{no_price_count} without price (would be inactive)."
+                    f"\n{prefix}Would create:\n"
+                    f"  {len(gammes)} categories\n"
+                    f"  {len(data)} products\n"
+                    f"  {total_decl} variants ({no_price} inactive — no price)\n"
+                    f"  4 attributes"
                 )
             )
-        else:
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"\nDone — {created_count} created, {updated_count} updated, "
-                    f"{no_price_count} inactive (no price)."
+            return
+
+        # --- seed attributes ---
+        attr_taille, _ = Attribute.objects.get_or_create(slug="taille", defaults={"name": "Taille"})
+        attr_classe, _ = Attribute.objects.get_or_create(slug="classe", defaults={"name": "Classe"})
+        attr_finition, _ = Attribute.objects.get_or_create(slug="finition", defaults={"name": "Finition"})
+        attr_fixations, _ = Attribute.objects.get_or_create(slug="fixations", defaults={"name": "Fixations"})
+
+        # cache for AttributeValue: (attribute_id, value) → AttributeValue
+        av_cache: dict[tuple, AttributeValue] = {}
+
+        def get_or_create_av(attr: Attribute, value: str, display: str, slug: str) -> AttributeValue:
+            key = (attr.id, value)
+            if key not in av_cache:
+                av, _ = AttributeValue.objects.get_or_create(
+                    attribute=attr,
+                    value=value,
+                    defaults={"display": display, "slug": slug},
                 )
+                av_cache[key] = av
+            return av_cache[key]
+
+        # --- import ---
+        seen_product_slugs: set[str] = set(Product.objects.values_list("slug", flat=True))
+        created_products = 0
+        created_variants = 0
+        skipped_variants = 0
+        no_price_count = 0
+
+        pva_batch: list[ProductVariantAttribute] = []
+
+        def flush_pva():
+            if pva_batch:
+                ProductVariantAttribute.objects.bulk_create(pva_batch, ignore_conflicts=True)
+                pva_batch.clear()
+
+        for family in data:
+            with transaction.atomic():
+                gamme = family["gamme"]
+                base_code = family["base_code"]
+                declinaisons = family.get("declinaisons", [])
+
+                cat_slug = slugify(gamme)
+                category, _ = Category.objects.get_or_create(
+                    slug=cat_slug,
+                    defaults={"name": gamme},
+                )
+
+                has_any_price = any(d.get("prix") is not None for d in declinaisons)
+                product_slug = _slug(base_code, seen_product_slugs)
+
+                product, p_created = Product.objects.update_or_create(
+                    base_code=base_code,
+                    defaults={
+                        "name": family["libelle"],
+                        "slug": product_slug,
+                        "type": family.get("type", ""),
+                        "category": category,
+                        "is_active": has_any_price,
+                    },
+                )
+                if p_created:
+                    created_products += 1
+
+                for decl in declinaisons:
+                    sku = decl["code"]
+                    prix = decl.get("prix")
+                    has_price = prix is not None
+                    if not has_price:
+                        no_price_count += 1
+
+                    variant, v_created = ProductVariant.objects.update_or_create(
+                        sku=sku,
+                        defaults={
+                            "product": product,
+                            "price": Decimal(str(prix)) if has_price else None,
+                            "weight_kg": decl.get("poids_kg"),
+                            "is_active": has_price,
+                        },
+                    )
+                    if v_created:
+                        created_variants += 1
+                    else:
+                        skipped_variants += 1
+
+                    av_list: list[AttributeValue] = []
+
+                    taille = _taille(decl)
+                    if taille:
+                        av_list.append(get_or_create_av(attr_taille, *taille))
+
+                    classe = decl.get("classe")
+                    if classe:
+                        av_list.append(get_or_create_av(
+                            attr_classe,
+                            classe,
+                            CLASSE_DISPLAY.get(classe.upper(), classe),
+                            slugify(classe),
+                        ))
+
+                    for fin in decl.get("finitions") or []:
+                        av_list.append(get_or_create_av(
+                            attr_finition,
+                            fin,
+                            FINITION_DISPLAY.get(fin, fin.title()),
+                            fin.lower(),
+                        ))
+
+                    if "fixations" in decl:
+                        val = "true" if decl["fixations"] else "false"
+                        display = "Avec fixations" if decl["fixations"] else "Sans fixation"
+                        slug = "avec-fixations" if decl["fixations"] else "sans-fixation"
+                        av_list.append(get_or_create_av(attr_fixations, val, display, slug))
+
+                    for av in av_list:
+                        pva_batch.append(ProductVariantAttribute(variant=variant, attribute_value=av))
+                        if len(pva_batch) >= BATCH_SIZE:
+                            flush_pva()
+
+        flush_pva()
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"\nDone.\n"
+                f"  {created_products} products created, "
+                f"{len(data) - created_products} updated\n"
+                f"  {created_variants} variants created, "
+                f"{skipped_variants} updated\n"
+                f"  {no_price_count} variants inactive (no price)\n"
+                f"  {AttributeValue.objects.count()} attribute values"
             )
+        )

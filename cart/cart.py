@@ -5,10 +5,10 @@ from catalog.repositories.product_repository import ProductRepository
 class Cart:
     """
     Session-based cart — works for both authenticated and guest users.
-    Stored as: session["cart"] = {"<product_id>": {"quantity": int}}
+    Stored as: session["cart_v2"] = {"<variant_id>": {"quantity": int}}
     """
 
-    SESSION_KEY = "cart"
+    SESSION_KEY = "cart_v2"
 
     def __init__(self, request):
         self.session = request.session
@@ -17,8 +17,8 @@ class Cart:
             cart = self.session[self.SESSION_KEY] = {}
         self.cart = cart
 
-    def add(self, product_id: int, quantity: int = 1, override_quantity: bool = False) -> None:
-        key = str(product_id)
+    def add(self, variant_id: int, quantity: int = 1, override_quantity: bool = False) -> None:
+        key = str(variant_id)
         if key not in self.cart:
             self.cart[key] = {"quantity": 0}
         if override_quantity:
@@ -27,8 +27,8 @@ class Cart:
             self.cart[key]["quantity"] += quantity
         self._save()
 
-    def remove(self, product_id: int) -> None:
-        key = str(product_id)
+    def remove(self, variant_id: int) -> None:
+        key = str(variant_id)
         if key in self.cart:
             del self.cart[key]
             self._save()
@@ -44,19 +44,20 @@ class Cart:
     def __iter__(self):
         if not self.cart:
             return
-        product_ids = [int(k) for k in self.cart]
+        variant_ids = [int(k) for k in self.cart]
         repo = ProductRepository()
-        products = {p.id: p for p in repo.list_active() if p.id in product_ids}
-        for product_id_str, item in self.cart.items():
-            product = products.get(int(product_id_str))
-            if product:
+        variants = {v.id: v for v in repo.list_active_variants_by_ids(variant_ids)}
+        for vid_str, item in self.cart.items():
+            variant = variants.get(int(vid_str))
+            if variant:
                 yield {
-                    "product_id": product.id,
-                    "product_name": product.name,
-                    "product_slug": product.slug,
+                    "variant_id": variant.id,
+                    "sku": variant.sku,
+                    "product_name": variant.product.name,
+                    "product_slug": variant.product.slug,
                     "quantity": item["quantity"],
-                    "unit_price": str(product.price),
-                    "total_price": str(product.price * item["quantity"]),
+                    "unit_price": str(variant.price),
+                    "total_price": str(variant.price * item["quantity"]),
                 }
 
     def get_subtotal(self) -> Decimal:
@@ -64,9 +65,9 @@ class Cart:
             return Decimal("0")
         repo = ProductRepository()
         total = Decimal("0")
-        for product_id_str, item in self.cart.items():
+        for vid_str, item in self.cart.items():
             try:
-                price = repo.get_price(int(product_id_str))
+                price = repo.get_variant_price(int(vid_str))
                 total += price * item["quantity"]
             except Exception:
                 pass
@@ -74,7 +75,7 @@ class Cart:
 
     def to_order_items(self) -> list[dict]:
         return [
-            {"product_id": int(k), "quantity": v["quantity"]}
+            {"variant_id": int(k), "quantity": v["quantity"]}
             for k, v in self.cart.items()
         ]
 

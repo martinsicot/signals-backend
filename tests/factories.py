@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from factory.django import DjangoModelFactory
 
 from accounts.models import Address, Customer, User
-from catalog.models import Category, Product
+from catalog.models import Category, Product, ProductVariant
 from orders.models import OrderLineModel, OrderModel
 
 
@@ -110,9 +110,20 @@ class ProductFactory(DjangoModelFactory):
         django_get_or_create = ("slug",)
 
     category = factory.SubFactory(CategoryFactory)
+    base_code = factory.Sequence(lambda n: f"TEST-{n}")
     name = factory.Sequence(lambda n: f"Product {n}")
     slug = factory.Sequence(lambda n: f"product-{n}")
-    description = factory.Faker("sentence")
+    type = "Panneau"
+    is_active = True
+
+
+class ProductVariantFactory(DjangoModelFactory):
+    class Meta:
+        model = ProductVariant
+        django_get_or_create = ("sku",)
+
+    product = factory.SubFactory(ProductFactory)
+    sku = factory.Sequence(lambda n: f"TEST-{n} 700-CL1")
     price = factory.Faker("pydecimal", left_digits=3, right_digits=2, positive=True)
     is_active = True
 
@@ -147,7 +158,7 @@ class OrderLineFactory(DjangoModelFactory):
         model = OrderLineModel
 
     order = factory.SubFactory(OrderFactory)
-    product = factory.SubFactory(ProductFactory)
-    product_name_snapshot = factory.LazyAttribute(lambda o: o.product.name)
+    product = factory.SubFactory(ProductVariantFactory)
+    product_name_snapshot = factory.LazyAttribute(lambda o: o.product.product.name)
     quantity = 1
     unit_price = factory.LazyAttribute(lambda o: o.product.price)

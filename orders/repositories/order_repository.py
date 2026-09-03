@@ -17,7 +17,7 @@ class OrderRepository:
             OrderLineModel.objects.bulk_create([
                 OrderLineModel(
                     order=order_model,
-                    product_id=line.product_id,
+                    product_id=line.variant_id,
                     product_name_snapshot=line.product_name,
                     quantity=line.quantity,
                     unit_price=line.unit_price,
@@ -61,7 +61,7 @@ class OrderRepository:
             stripe_session_id=model.stripe_session_id,
             lines=[
                 OrderLine(
-                    product_id=line.product_id,
+                    variant_id=line.product_id,
                     product_name=line.product_name_snapshot,
                     quantity=line.quantity,
                     unit_price=line.unit_price,

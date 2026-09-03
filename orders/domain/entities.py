@@ -14,7 +14,7 @@ class OrderStatus(Enum):
 
 @dataclass
 class OrderLine:
-    product_id: int
+    variant_id: int
     product_name: str
     quantity: int
     unit_price: Decimal

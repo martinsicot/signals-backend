@@ -32,11 +32,11 @@ class CartAddView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        product_id = request.data.get("product_id")
+        variant_id = request.data.get("variant_id")
         quantity = request.data.get("quantity", 1)
 
-        if not product_id:
-            return Response({"error": "product_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if not variant_id:
+            return Response({"error": "variant_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             quantity = int(quantity)
             assert quantity >= 1
@@ -44,14 +44,14 @@ class CartAddView(APIView):
             return Response({"error": "quantity must be >= 1."}, status=status.HTTP_400_BAD_REQUEST)
 
         cart = Cart(request)
-        cart.add(product_id=int(product_id), quantity=quantity)
+        cart.add(variant_id=int(variant_id), quantity=quantity)
         return Response({"item_count": len(cart)})
 
 
 class CartUpdateView(APIView):
     permission_classes = [AllowAny]
 
-    def patch(self, request, product_id):
+    def patch(self, request, variant_id):
         try:
             quantity = int(request.data.get("quantity", 0))
         except (ValueError, TypeError):
@@ -59,17 +59,17 @@ class CartUpdateView(APIView):
 
         cart = Cart(request)
         if quantity <= 0:
-            cart.remove(product_id)
+            cart.remove(variant_id)
         else:
-            cart.add(product_id=product_id, quantity=quantity, override_quantity=True)
+            cart.add(variant_id=variant_id, quantity=quantity, override_quantity=True)
         return Response({"item_count": len(cart)})
 
 
 class CartRemoveView(APIView):
     permission_classes = [AllowAny]
 
-    def delete(self, request, product_id):
-        Cart(request).remove(product_id)
+    def delete(self, request, variant_id):
+        Cart(request).remove(variant_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
