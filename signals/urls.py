@@ -2,13 +2,24 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.contrib.sitemaps.views import sitemap
+from django.http import JsonResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from .sitemaps import ProductSitemap, CategorySitemap
+
+
+def health(request):
+    return JsonResponse({"status": "ok"})
 
 sitemaps = {"products": ProductSitemap, "categories": CategorySitemap}
 
 urlpatterns = [
+    path("health/", health, name="health"),
     path("admin/", admin.site.urls),
+    # JWT auth
+    path("api/auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/auth/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     # API — customer-facing
     path("api/", include("accounts.api.urls")),
     path("api/", include("catalog.api.urls")),

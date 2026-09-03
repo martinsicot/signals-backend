@@ -3,7 +3,8 @@ FROM python:3.13-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy
+    UV_LINK_MODE=copy \
+    DJANGO_SETTINGS_MODULE=signals.settings.prod
 
 WORKDIR /app
 
@@ -14,7 +15,8 @@ RUN uv sync --frozen --no-dev
 
 COPY . .
 
-RUN uv run python manage.py collectstatic --no-input --settings=signals.settings.prod
+# collectstatic at build time — dummy SECRET_KEY is fine, DB is not needed
+RUN DJANGO_SECRET_KEY=build-time-placeholder uv run python manage.py collectstatic --no-input
 
 EXPOSE 8000
 
