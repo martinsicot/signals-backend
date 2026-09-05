@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
+from django.conf.urls.static import static
 from django.http import JsonResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
@@ -31,8 +32,9 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    from django.conf.urls.static import static
     import debug_toolbar
     urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
-    # Serve product images from MEDIA_ROOT during local development.
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Images are build-time assets baked into the Docker image — serve via Django.
+# TODO: replace with Cloudflare R2 when object storage is configured.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

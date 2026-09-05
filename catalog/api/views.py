@@ -29,7 +29,7 @@ class ProductListView(APIView):
         category_slug = request.query_params.get("category")
         q = request.query_params.get("q", "").strip() or None
         products = product_repo.list_active_products(category_slug=category_slug, q=q)
-        return Response(ProductListSerializer(products, many=True).data)
+        return Response(ProductListSerializer(products, many=True, context={"request": request}).data)
 
 
 class ProductDetailView(APIView):
@@ -40,7 +40,7 @@ class ProductDetailView(APIView):
             product = product_repo.get_product_by_slug(slug)
         except Product.DoesNotExist:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-        return Response(ProductDetailSerializer(product).data)
+        return Response(ProductDetailSerializer(product, context={"request": request}).data)
 
 
 class ProductVariantDetailView(APIView):

@@ -2,6 +2,7 @@ services:
   - type: web
     name: signals
     runtime: docker
+    branch: master
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health/
     envVars:

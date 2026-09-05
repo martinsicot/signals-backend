@@ -2,7 +2,7 @@
 
 COMPOSE = docker compose
 
-.PHONY: help up down restart logs shell migrate makemigrations build import-catalog seed thumbnails
+.PHONY: help up down restart logs shell migrate makemigrations build import-catalog seed thumbnails link-images
 
 help:
 	@echo "Usage: make <target>"
@@ -17,7 +17,8 @@ help:
 	@echo "  build         Rebuild l'image Docker"
 	@echo "  import-catalog Importer le catalogue depuis la grille de prix (--clear)"
 	@echo "  seed          Alias de import-catalog"
-	@echo "  thumbnails    Générer les vignettes WebP des images produits"
+	@echo "  thumbnails    Générer les vignettes WebP des images produits
+  link-images   Lier les PNG media aux produits en base (à lancer après import-catalog)"
 
 up:
 	$(COMPOSE) up --build -d
@@ -47,8 +48,12 @@ makemigrations:
 
 import-catalog:
 	$(COMPOSE) exec web uv run python manage.py import_price_grid --clear
+	$(COMPOSE) exec web uv run python manage.py link_product_images
 
 seed: import-catalog
 
 thumbnails:
 	$(COMPOSE) exec web uv run python manage.py generate_thumbnails
+
+link-images:
+	$(COMPOSE) exec web uv run python manage.py link_product_images
