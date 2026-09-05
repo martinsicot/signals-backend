@@ -35,9 +35,9 @@ class TestCRMCustomerListView:
         response = authenticated_client.get(self.url)
         assert response.status_code == 403
 
-    def test_returns_403_when_unauthenticated(self, client):
+    def test_returns_401_when_unauthenticated(self, client):
         response = client.get(self.url)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ---------------------------------------------------------------------------

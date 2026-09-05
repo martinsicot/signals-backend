@@ -103,9 +103,9 @@ class TestLogoutView:
         response = authenticated_client.post(self.url)
         assert response.status_code == 204
 
-    def test_returns_403_when_unauthenticated(self, client):
+    def test_returns_401_when_unauthenticated(self, client):
         response = client.post(self.url)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ---------------------------------------------------------------------------
@@ -128,9 +128,9 @@ class TestMeView:
         assert response.status_code == 200
         assert "crm" in response.json()["groups"]
 
-    def test_returns_403_when_unauthenticated(self, client):
+    def test_returns_401_when_unauthenticated(self, client):
         response = client.get(self.url)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ---------------------------------------------------------------------------
@@ -179,6 +179,6 @@ class TestAddressListCreateView:
         response = crm_client.get(self.url)
         assert response.status_code == 403
 
-    def test_returns_403_when_unauthenticated(self, client):
+    def test_returns_401_when_unauthenticated(self, client):
         response = client.get(self.url)
-        assert response.status_code == 403
+        assert response.status_code == 401
