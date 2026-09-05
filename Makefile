@@ -2,9 +2,7 @@
 
 COMPOSE = docker compose
 
-PRICING_FILE ?= "/Users/martin/Documents/perso/panneaux/SITE MARCHAND SIGNALISATION/Tableau Produits-Prix-Achat-Vente+Images dos.xlsx"
-
-.PHONY: help up down restart logs shell migrate makemigrations build import-products apply-pricing seed
+.PHONY: help up down restart logs shell migrate makemigrations build import-catalog seed
 
 help:
 	@echo "Usage: make <target>"
@@ -17,9 +15,8 @@ help:
 	@echo "  migrate       Appliquer les migrations"
 	@echo "  makemigrations Créer les migrations"
 	@echo "  build         Rebuild l'image Docker"
-	@echo "  import-products  Importer les panneaux depuis Produits.txt (--clear)"
-	@echo "  apply-pricing    Appliquer les prix depuis l'Excel (PRICING_FILE=...)"
-	@echo "  seed          Import produits + prix en une commande"
+	@echo "  import-catalog Importer le catalogue depuis la grille de prix (--clear)"
+	@echo "  seed          Alias de import-catalog"
 
 up:
 	$(COMPOSE) up --build -d
@@ -46,10 +43,7 @@ migrate:
 makemigrations:
 	$(COMPOSE) exec web uv run python manage.py makemigrations
 
-import-products:
-	$(COMPOSE) exec web uv run python manage.py import_products --clear
+import-catalog:
+	$(COMPOSE) exec web uv run python manage.py import_price_grid --clear
 
-apply-pricing:
-	$(COMPOSE) exec web uv run python manage.py apply_pricing --file $(PRICING_FILE)
-
-seed: import-products apply-pricing
+seed: import-catalog
