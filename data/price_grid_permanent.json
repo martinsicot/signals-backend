@@ -1,0 +1,2391 @@
+{
+  "meta": {
+    "domain": "signalisation_permanente",
+    "currency": "EUR",
+    "price_type": "HT",
+    "backings": [
+      {
+        "code": "alu_brut",
+        "label": "Dos alu brut",
+        "default": true
+      },
+      {
+        "code": "ral",
+        "label": "Alu RAL au choix",
+        "default": false
+      }
+    ],
+    "classes": [
+      "CL1",
+      "CL2"
+    ],
+    "source": "price_products_conductor.numbers",
+    "note": "vente/achat rounded to 2 decimals (EUR). specs shared per (schedule,size)."
+  },
+  "price_schedules": [
+    {
+      "code": "side_500_1250",
+      "size_kind": "single",
+      "member_count": 29,
+      "rows": [
+        {
+          "size": "500",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 500,
+            "label": "500"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 1.5,
+            "rails_mm": "150/300",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. ouvrés",
+            "transport_palette": "Départ ts les vendredis Livraison 3j. ouvrés"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 33.14,
+                "achat": 10.96
+              },
+              "CL2": {
+                "vente": 38.24,
+                "achat": 12.86
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 44.74,
+                "achat": 12.72
+              },
+              "CL2": {
+                "vente": 51.63,
+                "achat": 14.62
+              }
+            }
+          }
+        },
+        {
+          "size": "700",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 700,
+            "label": "700"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 2,
+            "rails_mm": "200/500",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 39.52,
+                "achat": 16.36
+              },
+              "CL2": {
+                "vente": 48.87,
+                "achat": 18.52
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 53.35,
+                "achat": 19.69
+              },
+              "CL2": {
+                "vente": 65.97,
+                "achat": 21.85
+              }
+            }
+          }
+        },
+        {
+          "size": "1000",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 1000,
+            "label": "1000"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 3.5,
+            "rails_mm": "250/800",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 64.17,
+                "achat": 27.33
+              },
+              "CL2": {
+                "vente": 73.94,
+                "achat": 32.51
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 86.62,
+                "achat": 33.55
+              },
+              "CL2": {
+                "vente": 99.82,
+                "achat": 38.73
+              }
+            }
+          }
+        },
+        {
+          "size": "1250",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 1250,
+            "label": "1250"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 5,
+            "rails_mm": "250/1000",
+            "delai_alu_brut": "4j. Ouvrés",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 133.44,
+                "achat": 37.76
+              },
+              "CL2": {
+                "vente": 116.44,
+                "achat": 46.61
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 180.15,
+                "achat": 48.01
+              },
+              "CL2": {
+                "vente": 157.2,
+                "achat": 56.86
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "code": "side_500_1250_2",
+      "size_kind": "single",
+      "member_count": 6,
+      "rows": [
+        {
+          "size": "500",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 500,
+            "label": "500"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 1.5,
+            "rails_mm": "150/300",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 33.14,
+                "achat": 10.96
+              },
+              "CL2": {
+                "vente": 38.24,
+                "achat": 12.86
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 44.74,
+                "achat": 12.72
+              },
+              "CL2": {
+                "vente": 51.63,
+                "achat": 14.62
+              }
+            }
+          }
+        },
+        {
+          "size": "700",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 700,
+            "label": "700"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 2,
+            "rails_mm": "200/500",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 39.52,
+                "achat": 16.36
+              },
+              "CL2": {
+                "vente": 48.87,
+                "achat": 18.52
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 53.35,
+                "achat": 19.69
+              },
+              "CL2": {
+                "vente": 65.97,
+                "achat": 21.85
+              }
+            }
+          }
+        },
+        {
+          "size": "1000",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 1000,
+            "label": "1000"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 3.5,
+            "rails_mm": "250/800",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 64.17,
+                "achat": 27.33
+              },
+              "CL2": {
+                "vente": 73.94,
+                "achat": 32.51
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 86.62,
+                "achat": 33.55
+              },
+              "CL2": {
+                "vente": 99.82,
+                "achat": 38.73
+              }
+            }
+          }
+        },
+        {
+          "size": "1250",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 1250,
+            "label": "1250"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 5,
+            "rails_mm": "250/1000",
+            "delai_alu_brut": "4j. Ouvrés",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 133.44,
+                "achat": 37.76
+              },
+              "CL2": {
+                "vente": 116.44,
+                "achat": 46.61
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 180.15,
+                "achat": 48.01
+              },
+              "CL2": {
+                "vente": 157.2,
+                "achat": 56.86
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "code": "side_400_1000",
+      "size_kind": "single",
+      "member_count": 1,
+      "rows": [
+        {
+          "size": "400",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 400,
+            "label": "400"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 1.5,
+            "rails_mm": "300",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 35.27,
+                "achat": 13.87
+              },
+              "CL2": {
+                "vente": 37.82,
+                "achat": 15.86
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 47.61,
+                "achat": 15.82
+              },
+              "CL2": {
+                "vente": 51.05,
+                "achat": 17.82
+              }
+            }
+          }
+        },
+        {
+          "size": "600",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 600,
+            "label": "600"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 3.5,
+            "rails_mm": "400",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 50.57,
+                "achat": 23.48
+              },
+              "CL2": {
+                "vente": 60.34,
+                "achat": 27.99
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 68.26,
+                "achat": 28.03
+              },
+              "CL2": {
+                "vente": 81.46,
+                "achat": 32.54
+              }
+            }
+          }
+        },
+        {
+          "size": "800",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 800,
+            "label": "800"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 4,
+            "rails_mm": "600",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 74.37,
+                "achat": 37.05
+              },
+              "CL2": {
+                "vente": 98.17,
+                "achat": 45.04
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 100.39,
+                "achat": 44.58
+              },
+              "CL2": {
+                "vente": 132.52,
+                "achat": 52.58
+              }
+            }
+          }
+        },
+        {
+          "size": "1000",
+          "dimensions": {
+            "kind": "single",
+            "value_mm": 1000,
+            "label": "1000"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 5.5,
+            "rails_mm": "800",
+            "delai_alu_brut": "4j. Ouvrés",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 125.37,
+                "achat": 53.8
+              },
+              "CL2": {
+                "vente": 155.12,
+                "achat": 66.3
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 169.24,
+                "achat": 65.48
+              },
+              "CL2": {
+                "vente": 209.41,
+                "achat": 77.98
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "code": "rect_350x350_1050x1050",
+      "size_kind": "rect",
+      "member_count": 108,
+      "rows": [
+        {
+          "size": "350x350",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 350,
+            "height_mm": 350,
+            "label": "350x350"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 1,
+            "rails_mm": "300",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 35.27,
+                "achat": 12.43
+              },
+              "CL2": {
+                "vente": 40.37,
+                "achat": 13.95
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 47.61,
+                "achat": 14.29
+              },
+              "CL2": {
+                "vente": 54.49,
+                "achat": 15.82
+              }
+            }
+          }
+        },
+        {
+          "size": "500x500",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 500,
+            "height_mm": 500,
+            "label": "500x500"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 2,
+            "rails_mm": "400",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 51.42,
+                "achat": 18.4
+              },
+              "CL2": {
+                "vente": 57.37,
+                "achat": 21.53
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 69.41,
+                "achat": 22.16
+              },
+              "CL2": {
+                "vente": 77.44,
+                "achat": 25.28
+              }
+            }
+          }
+        },
+        {
+          "size": "700x700",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 700,
+            "height_mm": 700,
+            "label": "700x700"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 3.5,
+            "rails_mm": "600",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 84.14,
+                "achat": 30.5
+              },
+              "CL2": {
+                "vente": 81.59,
+                "achat": 36.63
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 113.59,
+                "achat": 37.88
+              },
+              "CL2": {
+                "vente": 110.15,
+                "achat": 44.01
+              }
+            }
+          }
+        },
+        {
+          "size": "900x900",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 900,
+            "height_mm": 900,
+            "label": "900x900"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 5,
+            "rails_mm": "300/950/300",
+            "delai_alu_brut": "4j. Ouvrés",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 125.37,
+                "achat": 45.66
+              },
+              "CL2": {
+                "vente": 127.07,
+                "achat": 55.79
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 169.24,
+                "achat": 57.75
+              },
+              "CL2": {
+                "vente": 171.54,
+                "achat": 67.88
+              }
+            }
+          }
+        },
+        {
+          "size": "1050x1050",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 1050,
+            "height_mm": 1050,
+            "label": "1050x1050"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 6.5,
+            "rails_mm": "?",
+            "delai_alu_brut": "4j. Ouvrés",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "Impossible",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 175.52,
+                "achat": 63.18
+              },
+              "CL2": {
+                "vente": 226.94,
+                "achat": 77.06
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 236.95,
+                "achat": 78.15
+              },
+              "CL2": {
+                "vente": 306.37,
+                "achat": 92.03
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "code": "round_d450_d1050",
+      "size_kind": "diameter",
+      "member_count": 71,
+      "rows": [
+        {
+          "size": "Ø450",
+          "dimensions": {
+            "kind": "diameter",
+            "diameter_mm": 450,
+            "label": "Ø450"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 1.5,
+            "rails_mm": "300",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 32.72,
+                "achat": 15.38
+              },
+              "CL2": {
+                "vente": 43.34,
+                "achat": 17.91
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 44.17,
+                "achat": 18.43
+              },
+              "CL2": {
+                "vente": 58.51,
+                "achat": 20.97
+              }
+            }
+          }
+        },
+        {
+          "size": "Ø650",
+          "dimensions": {
+            "kind": "diameter",
+            "diameter_mm": 650,
+            "label": "Ø650"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 2.5,
+            "rails_mm": "400",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 50.57,
+                "achat": 25.75
+              },
+              "CL2": {
+                "vente": 60.77,
+                "achat": 31.04
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 68.26,
+                "achat": 32.05
+              },
+              "CL2": {
+                "vente": 82.03,
+                "achat": 37.34
+              }
+            }
+          }
+        },
+        {
+          "size": "Ø850",
+          "dimensions": {
+            "kind": "diameter",
+            "diameter_mm": 850,
+            "label": "Ø850"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 4,
+            "rails_mm": "600",
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 85.42,
+                "achat": 40.02
+              },
+              "CL2": {
+                "vente": 97.74,
+                "achat": 49.06
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 115.31,
+                "achat": 50.69
+              },
+              "CL2": {
+                "vente": 131.95,
+                "achat": 59.73
+              }
+            }
+          }
+        },
+        {
+          "size": "Ø1050",
+          "dimensions": {
+            "kind": "diameter",
+            "diameter_mm": 1050,
+            "label": "Ø1050"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 6,
+            "rails_mm": "800",
+            "delai_alu_brut": "4j. Ouvrés",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "Impossible",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 121.97,
+                "achat": 57.52
+              },
+              "CL2": {
+                "vente": 164.89,
+                "achat": 71.31
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 164.65,
+                "achat": 73.75
+              },
+              "CL2": {
+                "vente": 222.6,
+                "achat": 87.53
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "code": "rect_400x400_600x1800",
+      "size_kind": "rect",
+      "member_count": 1,
+      "rows": [
+        {
+          "size": "400x400",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 400,
+            "height_mm": 400,
+            "label": "400x400"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 1.5,
+            "rails_mm": null,
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 40.37,
+                "achat": 14.37
+              },
+              "CL2": {
+                "vente": 45.04,
+                "achat": 16.34
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 54.49,
+                "achat": 16.86
+              },
+              "CL2": {
+                "vente": 60.81,
+                "achat": 18.83
+              }
+            }
+          }
+        },
+        {
+          "size": "800x400",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 800,
+            "height_mm": 400,
+            "label": "800x400"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 3,
+            "rails_mm": null,
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 65.44,
+                "achat": 24.37
+              },
+              "CL2": {
+                "vente": 72.67,
+                "achat": 28.75
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 88.35,
+                "achat": 28.63
+              },
+              "CL2": {
+                "vente": 98.1,
+                "achat": 33.01
+              }
+            }
+          }
+        },
+        {
+          "size": "1200x400",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 1200,
+            "height_mm": 400,
+            "label": "1200x400"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 4,
+            "rails_mm": null,
+            "delai_alu_brut": "48/72h",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 107.52,
+                "achat": 35.7
+              },
+              "CL2": {
+                "vente": 87.54,
+                "achat": 42.16
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 145.15,
+                "achat": 42.7
+              },
+              "CL2": {
+                "vente": 118.18,
+                "achat": 49.17
+              }
+            }
+          }
+        },
+        {
+          "size": "1600x400",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 1600,
+            "height_mm": 400,
+            "label": "1600x400"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 5,
+            "rails_mm": null,
+            "delai_alu_brut": "4j. Ouvrés",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 138.97,
+                "achat": 45.05
+              },
+              "CL2": {
+                "vente": 154.27,
+                "achat": 53.04
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 187.6,
+                "achat": 54.71
+              },
+              "CL2": {
+                "vente": 208.26,
+                "achat": 62.7
+              }
+            }
+          }
+        },
+        {
+          "size": "600x600",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 600,
+            "height_mm": 600,
+            "label": "600x600"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 3,
+            "rails_mm": null,
+            "delai_alu_brut": "4j. Ouvrés",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 72.24,
+                "achat": 24.15
+              },
+              "CL2": {
+                "vente": 80.74,
+                "achat": 28.66
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 97.53,
+                "achat": 29.04
+              },
+              "CL2": {
+                "vente": 109.0,
+                "achat": 33.56
+              }
+            }
+          }
+        },
+        {
+          "size": "600x1200",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 600,
+            "height_mm": 1200,
+            "label": "600x1200"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 5,
+            "rails_mm": null,
+            "delai_alu_brut": "4j. Ouvrés",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 136.84,
+                "achat": 61.55
+              },
+              "CL2": {
+                "vente": 152.99,
+                "achat": 75.11
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 184.74,
+                "achat": 77.68
+              },
+              "CL2": {
+                "vente": 206.54,
+                "achat": 91.24
+              }
+            }
+          }
+        },
+        {
+          "size": "600x1800",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 600,
+            "height_mm": 1800,
+            "label": "600x1800"
+          },
+          "specs": {
+            "epaisseur_mm": 18,
+            "poids_kg": 7,
+            "rails_mm": null,
+            "delai_alu_brut": "4j. ouvrés",
+            "delai_ral": "5 à 6 jours",
+            "transport_dpd": "Impossible",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 186.57,
+                "achat": 83.75
+              },
+              "CL2": {
+                "vente": 210.79,
+                "achat": 104.1
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 251.86,
+                "achat": 105.74
+              },
+              "CL2": {
+                "vente": 284.57,
+                "achat": 126.08
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "code": "rect_1000x200_1000x200",
+      "size_kind": "rect",
+      "member_count": 1,
+      "rows": [
+        {
+          "size": "1000x200",
+          "dimensions": {
+            "kind": "rect",
+            "width_mm": 1000,
+            "height_mm": 200,
+            "label": "1000x200"
+          },
+          "specs": {
+            "epaisseur_mm": null,
+            "poids_kg": "Au sol",
+            "rails_mm": null,
+            "delai_alu_brut": "4j. Ouvrés",
+            "delai_ral": null,
+            "transport_dpd": "3j. Ouvrés",
+            "transport_palette": "//"
+          },
+          "prices": {
+            "alu_brut": {
+              "CL1": {
+                "vente": 70.25,
+                "achat": 31.93
+              },
+              "CL2": {
+                "vente": 81.49,
+                "achat": 37.04
+              }
+            },
+            "ral": {
+              "CL1": {
+                "vente": 39.91,
+                "achat": 87.81
+              },
+              "CL2": {
+                "vente": 46.3,
+                "achat": 101.86
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "sign_references": [
+    {
+      "ref": "A13a",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A13b",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A14",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A15a1",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A15a2",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A15b",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A15c",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A16",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A17",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A18",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A19",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A1a",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A1b",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A1c",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A1d",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A20",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A21",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A23",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A24",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A2a",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A2b",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A3",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A3a",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A3b",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A4",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A6",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A7",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A8",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "A9",
+      "shape": "triangle",
+      "schedule": "side_500_1250"
+    },
+    {
+      "ref": "AB1",
+      "shape": "triangle",
+      "schedule": "side_500_1250_2"
+    },
+    {
+      "ref": "AB2",
+      "shape": "triangle",
+      "schedule": "side_500_1250_2"
+    },
+    {
+      "ref": "AB25",
+      "shape": "triangle",
+      "schedule": "side_500_1250_2"
+    },
+    {
+      "ref": "AB3a",
+      "shape": "triangle",
+      "schedule": "side_500_1250_2"
+    },
+    {
+      "ref": "AB3b",
+      "shape": "triangle",
+      "schedule": "side_500_1250_2"
+    },
+    {
+      "ref": "AB3c",
+      "shape": "triangle",
+      "schedule": "side_500_1250_2"
+    },
+    {
+      "ref": "AB4",
+      "shape": "octagon",
+      "schedule": "side_400_1000"
+    },
+    {
+      "ref": "AB6",
+      "shape": "diamond",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "AB7",
+      "shape": "diamond",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B0",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B1",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B10a",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B11",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B12",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B13",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B13a",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B14",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B15",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B16",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B17",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B18a",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B18b",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B18c",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B19",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B21-1",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B21-2",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B21a1",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B21a2",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B21b",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B21c1",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B21c2",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B21d1",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B21d2",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B21e",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B22a",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B22b",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B22c",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B25",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B26",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B27a",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B27b",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B29",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B2a",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B2b",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B2c",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B3",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B31",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B33",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B34",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B34a",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B35",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B39",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B3a",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B4",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B40",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B41",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B42",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B43",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B45a",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B45b",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B49",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B50b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B50c",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B50d",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B50e",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B52",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B53",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B54",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B55",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B5b",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B5c",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B6a1",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B6a2",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B6a3",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B6b1",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B6b2",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B6b3",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B6b4",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B6b5b50a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "B6d",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B7a",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B7b",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B8",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B9a",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B9b",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B9c",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B9d",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B9e",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B9f",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B9g",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B9h",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "B9i",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    },
+    {
+      "ref": "C107",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C108",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C111",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C112",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C113",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C114",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C115",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C116",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C12",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C13a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C13b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C13c",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C13d",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C18",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C1a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C1b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C1c",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C207",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C208",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C20a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C20c",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C23",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C24aex1",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C24b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C24bex1",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C24bex2",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C24bex3",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C24bex4",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C24cex2",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C24ex2",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C24ex3",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C24ex4",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C26a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C26b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C27",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C28",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C28ex2",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C28ex3",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C29a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C29b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C29c",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C30",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C4a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C5",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C50",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C6",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C62",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C64a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C64b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C64c",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C64c2",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C64d",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C7",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "C8",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE1",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE10",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE12",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE14",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE15a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE15c",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE15e",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE15f",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE16",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE17",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE18",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE19",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE20a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE20b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE21",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE22",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE23",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE24",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE25",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE26",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE27",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE28",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE29",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE2a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE2b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE30a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE30b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE3a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE4a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE4b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE4c",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE50",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE5a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE5b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE6a",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE6b",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE7",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE8",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "CE9",
+      "shape": "square",
+      "schedule": "rect_350x350_1050x1050"
+    },
+    {
+      "ref": "G1",
+      "shape": "directional",
+      "schedule": null,
+      "pricing": "quote"
+    },
+    {
+      "ref": "G1a",
+      "shape": "directional",
+      "schedule": null,
+      "pricing": "quote"
+    },
+    {
+      "ref": "G1b",
+      "shape": "directional",
+      "schedule": null,
+      "pricing": "quote"
+    },
+    {
+      "ref": "G1c",
+      "shape": "directional",
+      "schedule": null,
+      "pricing": "quote"
+    },
+    {
+      "ref": "G3",
+      "shape": "directional",
+      "schedule": null,
+      "pricing": "quote"
+    },
+    {
+      "ref": "J10",
+      "shape": "rect",
+      "schedule": "rect_1000x200_1000x200"
+    },
+    {
+      "ref": "J4",
+      "shape": "rect",
+      "schedule": "rect_400x400_600x1800"
+    },
+    {
+      "ref": "XB2",
+      "shape": "round",
+      "schedule": "round_d450_d1050"
+    }
+  ],
+  "anomalies": [
+    {
+      "type": "unparsed_ref_token",
+      "schedule": "rect_350x350_1050x1050",
+      "source_label": "C1a C1b C1c C4a C5 C6 C7 C8 C12 C13a C13b C13c C13d C18 C20a C20c C23 C24aex1 C24ex2 C24ex3 C24ex4 C24bex1 C24bex2 C24bex3 C24bex4 C24b ex5C24c ex1 C24cex2 C26a C26b C27 C28 ex1 C28ex2 C28ex3 C29a C29b C29c  C30 C50 C62 C64a C64b  C64c C64c2 C64d C107 C108 C111 C112 C113 C114 C115 C116 C207 C208",
+      "token": "ex5C24c"
+    },
+    {
+      "type": "unparsed_ref_token",
+      "schedule": "rect_350x350_1050x1050",
+      "source_label": "C1a C1b C1c C4a C5 C6 C7 C8 C12 C13a C13b C13c C13d C18 C20a C20c C23 C24aex1 C24ex2 C24ex3 C24ex4 C24bex1 C24bex2 C24bex3 C24bex4 C24b ex5C24c ex1 C24cex2 C26a C26b C27 C28 ex1 C28ex2 C28ex3 C29a C29b C29c  C30 C50 C62 C64a C64b  C64c C64c2 C64d C107 C108 C111 C112 C113 C114 C115 C116 C207 C208",
+      "token": "ex1"
+    },
+    {
+      "type": "unparsed_ref_token",
+      "schedule": "rect_350x350_1050x1050",
+      "source_label": "C1a C1b C1c C4a C5 C6 C7 C8 C12 C13a C13b C13c C13d C18 C20a C20c C23 C24aex1 C24ex2 C24ex3 C24ex4 C24bex1 C24bex2 C24bex3 C24bex4 C24b ex5C24c ex1 C24cex2 C26a C26b C27 C28 ex1 C28ex2 C28ex3 C29a C29b C29c  C30 C50 C62 C64a C64b  C64c C64c2 C64d C107 C108 C111 C112 C113 C114 C115 C116 C207 C208",
+      "token": "ex1"
+    },
+    {
+      "type": "unparsed_ref_token",
+      "schedule": "round_d450_d1050",
+      "source_label": "B à mention : B10a B11 B12 B13 B13a B14 B17 B19 B25 B29 B33 B39 B43 B49",
+      "token": "B"
+    },
+    {
+      "type": "unparsed_ref_token",
+      "schedule": "round_d450_d1050",
+      "source_label": "B à mention : B10a B11 B12 B13 B13a B14 B17 B19 B25 B29 B33 B39 B43 B49",
+      "token": "à"
+    },
+    {
+      "type": "unparsed_ref_token",
+      "schedule": "round_d450_d1050",
+      "source_label": "B à mention : B10a B11 B12 B13 B13a B14 B17 B19 B25 B29 B33 B39 B43 B49",
+      "token": "mention"
+    },
+    {
+      "type": "ral_below_brut",
+      "schedule": "rect_1000x200_1000x200",
+      "size": "1000x200",
+      "class": "CL1",
+      "alu_brut": 70.25,
+      "ral": 39.91
+    },
+    {
+      "type": "ral_below_brut",
+      "schedule": "rect_1000x200_1000x200",
+      "size": "1000x200",
+      "class": "CL2",
+      "alu_brut": 81.49,
+      "ral": 46.3
+    }
+  ]
+}
