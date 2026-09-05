@@ -22,4 +22,4 @@ RUN DJANGO_SECRET_KEY=build-time-placeholder uv run python manage.py collectstat
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "uv run python manage.py migrate --no-input && uv run python manage.py import_price_grid && uv run python manage.py link_product_images && uv run gunicorn signals.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 60"]
+CMD ["sh", "-c", "uv run python manage.py migrate --no-input && uv run python manage.py import_price_grid --clear && uv run python manage.py link_product_images && uv run gunicorn signals.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 60"]
