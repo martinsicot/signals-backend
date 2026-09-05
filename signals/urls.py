@@ -10,6 +10,14 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 def health(request):
     return JsonResponse({"status": "ok"})
 
+
+def handler404(request, exception=None):
+    return JsonResponse({"detail": "Not found."}, status=404)
+
+
+def handler500(request):
+    return JsonResponse({"detail": "Internal server error."}, status=500)
+
 urlpatterns = [
     path("health/", health, name="health"),
     path("admin/", admin.site.urls),
