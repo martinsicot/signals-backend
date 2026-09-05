@@ -12,7 +12,12 @@ build/
 
 # Django
 staticfiles/
-media/
+# Ignore runtime media, but track the committed catalog product images.
+# Render has no persistent disk, so catalog images ship inside the build.
+media/*
+!media/products/
+# Generated WebP thumbnails are a build artifact (see generate_thumbnails).
+media/products/thumbs/
 *.sqlite3
 
 # Testing
