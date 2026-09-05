@@ -1,17 +1,13 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
-from django.contrib.sitemaps.views import sitemap
 from django.http import JsonResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
-from .sitemaps import ProductSitemap, CategorySitemap
 
 
 def health(request):
     return JsonResponse({"status": "ok"})
-
-sitemaps = {"products": ProductSitemap, "categories": CategorySitemap}
 
 urlpatterns = [
     path("health/", health, name="health"),
@@ -28,14 +24,6 @@ urlpatterns = [
     # API — CRM / ops
     path("api/crm/", include("accounts.api.urls_crm")),
     path("api/crm/", include("orders.api.urls_crm")),
-    # Web templates
-    path("", include("pages.urls")),
-    path("", include("catalog.urls_web")),
-    path("", include("accounts.urls_web")),
-    path("", include("cart.urls_web")),
-    path("", include("orders.urls_web")),
-    # Sitemap
-    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     # API docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
