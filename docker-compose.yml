@@ -35,6 +35,7 @@ services:
     env_file:
       - .env
     environment:
+      DJANGO_SETTINGS_MODULE: signals.settings.dev
       DATABASE_URL: postgres://signals:signals@db:5432/signals
       REDIS_URL: redis://redis:6379/0
     depends_on:
@@ -51,6 +52,7 @@ services:
     env_file:
       - .env
     environment:
+      DJANGO_SETTINGS_MODULE: signals.settings.dev
       DATABASE_URL: postgres://signals:signals@db:5432/signals
       REDIS_URL: redis://redis:6379/0
     depends_on:
