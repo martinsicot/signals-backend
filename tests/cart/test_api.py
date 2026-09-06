@@ -1,6 +1,6 @@
 import pytest
 
-from tests.factories import ProductFactory
+from tests.factories import ProductVariantFactory
 
 
 # ---------------------------------------------------------------------------
@@ -20,9 +20,9 @@ class TestCartView:
         assert float(data["subtotal"]) == 0
 
     def test_reflects_items_added_to_session(self, client):
-        product = ProductFactory(price="49.90")
+        variant = ProductVariantFactory(price="49.90")
         client.post("/api/cart/add/", data={
-            "product_id": product.pk,
+            "variant_id": variant.pk,
             "quantity": 2,
         }, content_type="application/json")
 
@@ -40,90 +40,96 @@ class TestCartAddView:
     url = "/api/cart/add/"
 
     def test_adds_product_to_cart(self, client):
-        product = ProductFactory()
+        variant = ProductVariantFactory()
 
         response = client.post(self.url, data={
-            "product_id": product.pk,
+            "variant_id": variant.pk,
             "quantity": 1,
         }, content_type="application/json")
 
         assert response.status_code == 200
 
     def test_increments_quantity_on_second_add(self, client):
-        product = ProductFactory()
-        client.post(self.url, data={"product_id": product.pk, "quantity": 2},
+        variant = ProductVariantFactory()
+        client.post(self.url, data={"variant_id": variant.pk, "quantity": 2},
                     content_type="application/json")
-        client.post(self.url, data={"product_id": product.pk, "quantity": 3},
+        client.post(self.url, data={"variant_id": variant.pk, "quantity": 3},
                     content_type="application/json")
 
         response = client.get("/api/cart/")
         assert response.json()["item_count"] == 5
 
-    def test_override_replaces_quantity(self, client):
-        product = ProductFactory()
-        client.post(self.url, data={"product_id": product.pk, "quantity": 5},
+    def test_add_endpoint_is_additive_and_ignores_override_flag(self, client):
+        # The add endpoint always increments; replace semantics live on PATCH update.
+        variant = ProductVariantFactory()
+        client.post(self.url, data={"variant_id": variant.pk, "quantity": 5},
                     content_type="application/json")
-        client.post(self.url, data={"product_id": product.pk, "quantity": 2,
+        client.post(self.url, data={"variant_id": variant.pk, "quantity": 2,
                                     "override_quantity": True},
                     content_type="application/json")
 
         response = client.get("/api/cart/")
-        assert response.json()["item_count"] == 2
+        assert response.json()["item_count"] == 7
 
-    def test_returns_400_when_product_id_missing(self, client):
+    def test_returns_400_when_variant_id_missing(self, client):
         response = client.post(self.url, data={"quantity": 1},
                                content_type="application/json")
         assert response.status_code == 400
 
 
 # ---------------------------------------------------------------------------
-# Update — PATCH /api/cart/update/{product_id}/
+# Update — PATCH /api/cart/update/{variant_id}/
 # ---------------------------------------------------------------------------
 
 @pytest.mark.django_db
 class TestCartUpdateView:
     def test_updates_product_quantity(self, client):
-        product = ProductFactory()
-        client.post("/api/cart/add/", data={"product_id": product.pk, "quantity": 1},
+        variant = ProductVariantFactory()
+        client.post("/api/cart/add/", data={"variant_id": variant.pk, "quantity": 1},
                     content_type="application/json")
 
-        response = client.patch(f"/api/cart/update/{product.pk}/",
+        response = client.patch(f"/api/cart/update/{variant.pk}/",
                                 data={"quantity": 4},
                                 content_type="application/json")
 
         assert response.status_code == 200
         assert client.get("/api/cart/").json()["item_count"] == 4
 
-    def test_returns_400_when_quantity_missing(self, client):
-        product = ProductFactory()
-        response = client.patch(f"/api/cart/update/{product.pk}/",
+    def test_missing_quantity_removes_item(self, client):
+        # A missing/zero quantity is treated as "remove" by the update endpoint.
+        variant = ProductVariantFactory()
+        client.post("/api/cart/add/", data={"variant_id": variant.pk, "quantity": 2},
+                    content_type="application/json")
+
+        response = client.patch(f"/api/cart/update/{variant.pk}/",
                                 data={},
                                 content_type="application/json")
-        assert response.status_code == 400
+        assert response.status_code == 200
+        assert client.get("/api/cart/").json()["item_count"] == 0
 
 
 # ---------------------------------------------------------------------------
-# Remove — DELETE /api/cart/remove/{product_id}/
+# Remove — DELETE /api/cart/remove/{variant_id}/
 # ---------------------------------------------------------------------------
 
 @pytest.mark.django_db
 class TestCartRemoveView:
     def test_removes_product_from_cart(self, client):
-        product = ProductFactory()
-        client.post("/api/cart/add/", data={"product_id": product.pk, "quantity": 2},
+        variant = ProductVariantFactory()
+        client.post("/api/cart/add/", data={"variant_id": variant.pk, "quantity": 2},
                     content_type="application/json")
 
-        response = client.delete(f"/api/cart/remove/{product.pk}/")
-        assert response.status_code == 200
+        response = client.delete(f"/api/cart/remove/{variant.pk}/")
+        assert response.status_code == 204
         assert client.get("/api/cart/").json()["item_count"] == 0
 
     def test_removing_nonexistent_item_is_safe(self, client):
         response = client.delete("/api/cart/remove/99999/")
-        assert response.status_code == 200
+        assert response.status_code == 204
 
 
 # ---------------------------------------------------------------------------
-# Clear — POST /api/cart/clear/
+# Clear — DELETE /api/cart/clear/
 # ---------------------------------------------------------------------------
 
 @pytest.mark.django_db
@@ -131,14 +137,14 @@ class TestCartClearView:
     url = "/api/cart/clear/"
 
     def test_clears_all_items(self, client):
-        product = ProductFactory()
-        client.post("/api/cart/add/", data={"product_id": product.pk, "quantity": 3},
+        variant = ProductVariantFactory()
+        client.post("/api/cart/add/", data={"variant_id": variant.pk, "quantity": 3},
                     content_type="application/json")
 
-        response = client.post(self.url)
-        assert response.status_code == 200
+        response = client.delete(self.url)
+        assert response.status_code == 204
         assert client.get("/api/cart/").json()["item_count"] == 0
 
     def test_clearing_empty_cart_is_safe(self, client):
-        response = client.post(self.url)
-        assert response.status_code == 200
+        response = client.delete(self.url)
+        assert response.status_code == 204

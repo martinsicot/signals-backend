@@ -3,7 +3,14 @@ from django.contrib.auth.models import Group
 from factory.django import DjangoModelFactory
 
 from accounts.models import Address, Customer, User
-from catalog.models import Category, Product, ProductVariant
+from catalog.models import (
+    Attribute,
+    AttributeValue,
+    Category,
+    Product,
+    ProductVariant,
+    ProductVariantAttribute,
+)
 from orders.models import OrderLineModel, OrderModel
 
 
@@ -39,35 +46,37 @@ class CustomerUserFactory(UserFactory):
         self.groups.add(group)
 
 
+def _add_user_to_group(user, group_name):
+    group, _ = Group.objects.get_or_create(name=group_name)
+    user.groups.add(group)
+
+
 class StaffUserFactory(UserFactory):
-    """A User that belongs to 'crm' or 'ops' — no Customer profile."""
+    """A User that belongs to 'crm' or 'ops' — no Customer profile.
+
+    Concrete subclasses assign the group via their own ``add_to_group`` hook.
+    """
 
     is_staff = True
     email = factory.Sequence(lambda n: f"staff{n}@example.com")
 
-    class Params:
-        role = "crm"
+
+class CRMUserFactory(StaffUserFactory):
+    email = factory.Sequence(lambda n: f"crm{n}@example.com")
 
     @factory.post_generation
     def add_to_group(self, create, extracted, **kwargs):
-        if not create:
-            return
-        group, _ = Group.objects.get_or_create(name=self._Params__role)
-        self.groups.add(group)
-
-
-class CRMUserFactory(StaffUserFactory):
-    class Params:
-        role = "crm"
-
-    email = factory.Sequence(lambda n: f"crm{n}@example.com")
+        if create:
+            _add_user_to_group(self, "crm")
 
 
 class OpsUserFactory(StaffUserFactory):
-    class Params:
-        role = "ops"
-
     email = factory.Sequence(lambda n: f"ops{n}@example.com")
+
+    @factory.post_generation
+    def add_to_group(self, create, extracted, **kwargs):
+        if create:
+            _add_user_to_group(self, "ops")
 
 
 class CustomerFactory(DjangoModelFactory):
@@ -117,15 +126,45 @@ class ProductFactory(DjangoModelFactory):
     is_active = True
 
 
+class AttributeFactory(DjangoModelFactory):
+    class Meta:
+        model = Attribute
+        django_get_or_create = ("slug",)
+
+    name = factory.Sequence(lambda n: f"Attribute {n}")
+    slug = factory.Sequence(lambda n: f"attribute-{n}")
+
+
+class AttributeValueFactory(DjangoModelFactory):
+    class Meta:
+        model = AttributeValue
+        django_get_or_create = ("attribute", "value")
+
+    attribute = factory.SubFactory(AttributeFactory)
+    value = factory.Sequence(lambda n: f"value-{n}")
+    display = factory.LazyAttribute(lambda o: o.value.replace("-", " ").title())
+    slug = factory.Sequence(lambda n: f"value-{n}")
+
+
 class ProductVariantFactory(DjangoModelFactory):
     class Meta:
         model = ProductVariant
         django_get_or_create = ("sku",)
+        skip_postgeneration_save = True
 
     product = factory.SubFactory(ProductFactory)
     sku = factory.Sequence(lambda n: f"TEST-{n} 700-CL1")
     price = factory.Faker("pydecimal", left_digits=3, right_digits=2, positive=True)
     is_active = True
+
+    @factory.post_generation
+    def attribute_values(self, create, extracted, **kwargs):
+        """Attach AttributeValue instances, e.g.
+        ProductVariantFactory(attribute_values=[av1, av2])."""
+        if not create or not extracted:
+            return
+        for av in extracted:
+            ProductVariantAttribute.objects.create(variant=self, attribute_value=av)
 
 
 class OrderFactory(DjangoModelFactory):

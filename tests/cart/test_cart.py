@@ -5,10 +5,16 @@ from django.test import RequestFactory
 from cart.cart import Cart
 
 
+class _DictSession(dict):
+    """A dict that also accepts the `.modified` attribute Cart._save() sets."""
+
+    modified = False
+
+
 def make_request_with_session():
     factory = RequestFactory()
     request = factory.get("/")
-    request.session = {}
+    request.session = _DictSession()
     return request
 
 
@@ -29,8 +35,8 @@ class TestCartAdd:
         cart = Cart(request)
 
         # Act
-        cart.add(product_id=1, quantity=2)
-        cart.add(product_id=1, quantity=3)
+        cart.add(variant_id=1, quantity=2)
+        cart.add(variant_id=1, quantity=3)
 
         # Assert
         assert cart.cart["1"]["quantity"] == 5
@@ -39,10 +45,10 @@ class TestCartAdd:
         # Arrange
         request = make_request_with_session()
         cart = Cart(request)
-        cart.add(product_id=1, quantity=5)
+        cart.add(variant_id=1, quantity=5)
 
         # Act
-        cart.add(product_id=1, quantity=2, override_quantity=True)
+        cart.add(variant_id=1, quantity=2, override_quantity=True)
 
         # Assert
         assert cart.cart["1"]["quantity"] == 2
@@ -53,8 +59,8 @@ class TestCartAdd:
         cart = Cart(request)
 
         # Act
-        cart.add(product_id=1, quantity=1)
-        cart.add(product_id=2, quantity=3)
+        cart.add(variant_id=1, quantity=1)
+        cart.add(variant_id=2, quantity=3)
 
         # Assert
         assert len(cart) == 4
@@ -65,10 +71,10 @@ class TestCartRemove:
         # Arrange
         request = make_request_with_session()
         cart = Cart(request)
-        cart.add(product_id=1, quantity=2)
+        cart.add(variant_id=1, quantity=2)
 
         # Act
-        cart.remove(product_id=1)
+        cart.remove(variant_id=1)
 
         # Assert
         assert "1" not in cart.cart
@@ -79,7 +85,7 @@ class TestCartRemove:
         cart = Cart(request)
 
         # Act & Assert — no exception
-        cart.remove(product_id=99)
+        cart.remove(variant_id=99)
 
 
 class TestCartClear:
@@ -87,14 +93,15 @@ class TestCartClear:
         # Arrange
         request = make_request_with_session()
         cart = Cart(request)
-        cart.add(product_id=1, quantity=2)
-        cart.add(product_id=2, quantity=1)
+        cart.add(variant_id=1, quantity=2)
+        cart.add(variant_id=2, quantity=1)
 
         # Act
         cart.clear()
 
-        # Assert
-        assert len(cart) == 0
+        # Assert — the cleared state is persisted to the session
+        assert Cart.SESSION_KEY not in request.session
+        assert len(Cart(request)) == 0
 
     def test_clear_on_empty_cart_is_safe(self):
         # Arrange
@@ -110,12 +117,12 @@ class TestCartToOrderItems:
         # Arrange
         request = make_request_with_session()
         cart = Cart(request)
-        cart.add(product_id=1, quantity=2)
-        cart.add(product_id=3, quantity=1)
+        cart.add(variant_id=1, quantity=2)
+        cart.add(variant_id=3, quantity=1)
 
         # Act
         items = cart.to_order_items()
 
         # Assert
-        assert {"product_id": 1, "quantity": 2} in items
-        assert {"product_id": 3, "quantity": 1} in items
+        assert {"variant_id": 1, "quantity": 2} in items
+        assert {"variant_id": 3, "quantity": 1} in items
