@@ -59,5 +59,4 @@ def test_product(db, test_category):
         category=test_category,
         name="Stop Sign",
         slug="stop-sign",
-        price="49.90",
     )
