@@ -41,8 +41,15 @@ from catalog.models import (
     ProductVariantAttribute,
 )
 
-CATEGORY_NAME = "Signalisation permanente"
-CATEGORY_SLUG = "signalisation-permanente"
+PREFIX_CATEGORIES = {
+    "A": ("Danger", "danger"),
+    "B": ("Prescription", "prescription"),
+    "C": ("Obligation", "obligation"),
+    "D": ("Direction", "direction"),
+    "E": ("Localisation", "localisation"),
+    "F": ("Divers", "divers"),
+    "G": ("Grands axes", "grands-axes"),
+}
 BATCH_SIZE = 1000
 
 
@@ -110,9 +117,10 @@ class Command(BaseCommand):
                 Category.objects.all().delete()
                 self.stdout.write(self.style.WARNING("Cleared catalog + price-grid data."))
 
-            category, _ = Category.objects.get_or_create(
-                slug=CATEGORY_SLUG, defaults={"name": CATEGORY_NAME}
-            )
+            category_objs: dict[str, Category] = {}
+            for prefix, (name, slug) in PREFIX_CATEGORIES.items():
+                cat, _ = Category.objects.get_or_create(slug=slug, defaults={"name": name})
+                category_objs[prefix] = cat
 
             # --- 1. price grid ---
             schedule_objs: dict[str, PriceSchedule] = {}
@@ -209,12 +217,12 @@ class Command(BaseCommand):
             for r in refs:
                 ref = r["ref"]
                 is_quote = not r.get("schedule")
+                prefix = ref[0].upper()
                 product, p_created = Product.objects.update_or_create(
                     base_code=ref,
                     defaults={
                         "name": f"Panneau {ref}",
                         "slug": uniq_slug(f"panneau-{ref}"),
-                        "category": category,
                         "shape": r.get("shape", "unknown"),
                         "price_schedule": None if is_quote else schedule_objs[r["schedule"]],
                         "is_quote": is_quote,
@@ -222,6 +230,8 @@ class Command(BaseCommand):
                         "is_active": True,
                     },
                 )
+                if prefix in category_objs:
+                    product.categories.set([category_objs[prefix]])
                 created_products += int(p_created)
                 if is_quote:
                     continue

@@ -133,7 +133,7 @@ class PriceCell(models.Model):
 class Product(models.Model):
     """One regulatory sign (e.g. A1a). Its variants are size × classe × backing."""
 
-    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="products")
+    categories = models.ManyToManyField(Category, related_name="products", blank=True)
     base_code = models.CharField(max_length=100, unique=True, db_index=True)  # regulatory ref
     name = models.CharField(max_length=300)
     slug = models.SlugField(max_length=120, unique=True)

@@ -11,12 +11,13 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ["name", "base_code", "type", "category", "is_active", "created_at"]
-    list_filter = ["category", "type", "is_active"]
+    list_display = ["name", "base_code", "type", "is_active", "created_at"]
+    list_filter = ["categories", "type", "is_active"]
     search_fields = ["name", "base_code"]
     prepopulated_fields = {"slug": ("name",)}
     list_editable = ["is_active"]
     readonly_fields = ["created_at"]
+    filter_horizontal = ["categories"]
 
 
 @admin.register(Attribute)
@@ -35,6 +36,6 @@ class AttributeValueAdmin(admin.ModelAdmin):
 @admin.register(ProductVariant)
 class ProductVariantAdmin(admin.ModelAdmin):
     list_display = ["sku", "product", "price", "is_active"]
-    list_filter = ["is_active", "product__category"]
+    list_filter = ["is_active", "product__categories"]
     search_fields = ["sku", "product__name"]
     list_editable = ["price", "is_active"]

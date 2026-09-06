@@ -8,8 +8,7 @@ class ProductRepository:
     def get_product_by_slug(self, slug: str) -> Product:
         return (
             Product.objects
-            .select_related("category")
-            .prefetch_related("variants__attributes__attribute")
+            .prefetch_related("categories", "variants__attributes__attribute")
             .get(slug=slug, is_active=True)
         )
 
@@ -17,11 +16,10 @@ class ProductRepository:
         qs = (
             Product.objects
             .filter(is_active=True)
-            .select_related("category")
-            .prefetch_related("variants")
+            .prefetch_related("categories", "variants")
         )
         if category_slug:
-            qs = qs.filter(category__slug=category_slug)
+            qs = qs.filter(categories__slug=category_slug)
         if q:
             qs = qs.filter(name__icontains=q) | qs.filter(description__icontains=q)
         return qs
@@ -31,16 +29,16 @@ class ProductRepository:
     def get_variant_by_id(self, variant_id: int) -> ProductVariant:
         return (
             ProductVariant.objects
-            .select_related("product__category")
-            .prefetch_related("attributes__attribute")
+            .select_related("product")
+            .prefetch_related("product__categories", "attributes__attribute")
             .get(id=variant_id, is_active=True)
         )
 
     def get_variant_by_sku(self, sku: str) -> ProductVariant:
         return (
             ProductVariant.objects
-            .select_related("product__category")
-            .prefetch_related("attributes__attribute")
+            .select_related("product")
+            .prefetch_related("product__categories", "attributes__attribute")
             .get(sku=sku, is_active=True)
         )
 
