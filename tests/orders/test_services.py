@@ -7,19 +7,19 @@ from orders.services.order_service import OrderService
 
 
 @pytest.fixture
-def mock_product():
-    product = MagicMock()
-    product.name = "Stop Sign"
-    return product
+def mock_variant():
+    variant = MagicMock()
+    variant.display_name = "Stop Sign"
+    return variant
 
 
 @pytest.fixture
-def order_service(mock_product):
+def order_service(mock_variant):
     service = OrderService.__new__(OrderService)
     service.order_repo = MagicMock()
     service.product_repo = MagicMock()
-    service.product_repo.get_by_id.return_value = mock_product
-    service.product_repo.get_price.return_value = Decimal("50.00")
+    service.product_repo.get_variant_by_id.return_value = mock_variant
+    service.product_repo.get_variant_price.return_value = Decimal("50.00")
     service.order_repo.save.return_value = MagicMock(id=1)
     return service
 
@@ -28,7 +28,7 @@ class TestCreateOrder:
     def test_create_order_sets_correct_status(self, order_service):
         # Act
         order_service.create_order(
-            cart_items=[{"product_id": 1, "quantity": 1}],
+            cart_items=[{"variant_id": 1, "quantity": 1}],
             shipping_address={"city": "Paris"},
             customer_id=1,
         )
@@ -42,7 +42,7 @@ class TestCreateOrder:
 
         # Act
         order_service.create_order(
-            cart_items=[{"product_id": 1, "quantity": 2}],
+            cart_items=[{"variant_id": 1, "quantity": 2}],
             shipping_address={},
             customer_id=1,
         )
@@ -60,7 +60,7 @@ class TestCreateOrder:
 
             # Act
             order_service.create_order(
-                cart_items=[{"product_id": 1, "quantity": 1}],
+                cart_items=[{"variant_id": 1, "quantity": 1}],
                 shipping_address={},
                 customer_id=1,
             )
@@ -81,7 +81,7 @@ class TestCreateOrder:
     def test_create_order_sets_guest_email_when_no_customer(self, order_service):
         # Act
         order_service.create_order(
-            cart_items=[{"product_id": 1, "quantity": 1}],
+            cart_items=[{"variant_id": 1, "quantity": 1}],
             shipping_address={},
             guest_email="guest@example.com",
         )
@@ -94,7 +94,7 @@ class TestCreateOrder:
     def test_create_order_snapshots_product_name(self, order_service):
         # Act
         order_service.create_order(
-            cart_items=[{"product_id": 1, "quantity": 1}],
+            cart_items=[{"variant_id": 1, "quantity": 1}],
             shipping_address={},
             customer_id=1,
         )

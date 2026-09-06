@@ -16,9 +16,9 @@ def make_order(lines=None, shipping_fee=Decimal("9.90")):
     )
 
 
-def make_line(product_id=1, quantity=1, unit_price=Decimal("50.00")):
+def make_line(variant_id=1, quantity=1, unit_price=Decimal("50.00")):
     return OrderLine(
-        product_id=product_id,
+        variant_id=variant_id,
         product_name="Stop Sign",
         quantity=quantity,
         unit_price=unit_price,
@@ -133,8 +133,8 @@ class TestOrderValidation:
     def test_validate_order_raises_error_when_multi_line_total_exceeds_max(self):
         # Arrange
         order = make_order(lines=[
-            make_line(product_id=1, quantity=30),
-            make_line(product_id=2, quantity=25),
+            make_line(variant_id=1, quantity=30),
+            make_line(variant_id=2, quantity=25),
         ])
 
         # Act & Assert
@@ -153,7 +153,7 @@ class TestOrderValidation:
         # Arrange
         order = make_order(lines=[
             make_line(quantity=2),
-            make_line(product_id=2, quantity=3),
+            make_line(variant_id=2, quantity=3),
         ])
 
         # Act & Assert — no exception raised

@@ -113,10 +113,10 @@ class TestCreateCheckoutSessionView:
         assert response.status_code == 400
         assert "error" in response.json()
 
-    def test_returns_403_when_unauthenticated(self, client):
+    def test_returns_401_when_unauthenticated(self, client):
         order = OrderFactory()
         response = client.post(self._url(order.pk), content_type="application/json")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ---------------------------------------------------------------------------

@@ -4,7 +4,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from orders.domain.exceptions import EmptyOrderError, OrderTooLargeError
-from tests.factories import CustomerFactory, OrderFactory, OrderLineFactory, ProductFactory
+from tests.factories import (
+    CustomerFactory,
+    OrderFactory,
+    OrderLineFactory,
+    ProductVariantFactory,
+)
 
 
 def make_mock_order_model():
@@ -16,7 +21,7 @@ def make_mock_order_model():
     order.created_at.isoformat.return_value = "2025-01-01T00:00:00"
     line = MagicMock()
     line.id = 1
-    line.product_id = 1
+    line.product_id = 1  # OrderLineModel FK column to ProductVariant
     line.product_name_snapshot = "Stop Sign"
     line.quantity = 2
     line.unit_price = Decimal("50.00")
@@ -41,7 +46,7 @@ class TestCreateOrderView:
             mock_manager.prefetch_related.return_value.get.return_value = mock_order
 
             response = client.post(self.url, data={
-                "items": [{"product_id": 1, "quantity": 2}],
+                "items": [{"variant_id": 1, "quantity": 2}],
                 "shipping_address": {"city": "Paris"},
                 "guest_email": "guest@example.com",
             }, content_type="application/json")
@@ -55,7 +60,7 @@ class TestCreateOrderView:
             )
 
             response = client.post(self.url, data={
-                "items": [{"product_id": 1, "quantity": 60}],
+                "items": [{"variant_id": 1, "quantity": 60}],
                 "shipping_address": {},
                 "guest_email": "guest@example.com",
             }, content_type="application/json")
@@ -74,7 +79,7 @@ class TestCreateOrderView:
 
     def test_returns_400_when_guest_email_missing_for_unauthenticated(self, client):
         response = client.post(self.url, data={
-            "items": [{"product_id": 1, "quantity": 1}],
+            "items": [{"variant_id": 1, "quantity": 1}],
             "shipping_address": {},
         }, content_type="application/json")
 
@@ -90,7 +95,7 @@ class TestCreateOrderView:
             mock_manager.prefetch_related.return_value.get.return_value = mock_order
 
             authenticated_client.post(self.url, data={
-                "items": [{"product_id": 1, "quantity": 1}],
+                "items": [{"variant_id": 1, "quantity": 1}],
                 "shipping_address": {},
             }, content_type="application/json")
 
@@ -122,9 +127,9 @@ class TestCustomerOrderListView:
         response = client.get(self.url)
         assert response.json() == []
 
-    def test_returns_403_when_unauthenticated(self, client):
+    def test_returns_401_when_unauthenticated(self, client):
         response = client.get(self.url)
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ---------------------------------------------------------------------------
@@ -148,10 +153,10 @@ class TestOrderDetailView:
         response = client.get(f"/api/orders/{other_order.pk}/")
         assert response.status_code == 404
 
-    def test_returns_403_when_unauthenticated(self, client):
+    def test_returns_401_when_unauthenticated(self, client):
         order = OrderFactory()
         response = client.get(f"/api/orders/{order.pk}/")
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 # ---------------------------------------------------------------------------
@@ -162,8 +167,8 @@ class TestOrderDetailView:
 class TestOrderLinesInResponse:
     def test_order_detail_includes_lines(self, client, customer):
         order = OrderFactory(customer=customer)
-        product = ProductFactory()
-        OrderLineFactory(order=order, product=product, quantity=3)
+        variant = ProductVariantFactory()
+        OrderLineFactory(order=order, product=variant, quantity=3)
         client.force_login(customer.user)
 
         response = client.get(f"/api/orders/{order.pk}/")
