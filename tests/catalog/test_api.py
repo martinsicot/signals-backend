@@ -176,6 +176,147 @@ class TestProductSearchView:
 
 
 @pytest.mark.django_db
+class TestProductListFilters:
+    url = "/api/products/"
+
+    def test_filter_by_shape(self, client):
+        ProductFactory(slug="tri-1", shape="triangle")
+        ProductFactory(slug="tri-2", shape="triangle")
+        ProductFactory(slug="rnd-1", shape="round")
+
+        response = client.get(self.url, {"shape": "triangle"})
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["count"] == 2
+        assert {r["slug"] for r in data["results"]} == {"tri-1", "tri-2"}
+
+    def test_filter_by_classe(self, client):
+        p1 = ProductFactory(slug="cl1-product", shape="round")
+        p2 = ProductFactory(slug="cl2-product", shape="round")
+        ProductVariantFactory(product=p1, sku="CL1-V", classe="CL1", is_active=True)
+        ProductVariantFactory(product=p2, sku="CL2-V", classe="CL2", is_active=True)
+
+        response = client.get(self.url, {"classe": "CL1"})
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["count"] == 1
+        assert data["results"][0]["slug"] == "cl1-product"
+
+    def test_filter_by_classe_ignores_inactive_variants(self, client):
+        p = ProductFactory(slug="only-inactive-cl1", shape="round")
+        ProductVariantFactory(product=p, sku="INACT-CL1", classe="CL1", is_active=False)
+
+        response = client.get(self.url, {"classe": "CL1"})
+
+        assert response.status_code == 200
+        assert response.json()["count"] == 0
+
+    def test_filter_by_classe_is_distinct(self, client):
+        """A product with several matching variants is returned once."""
+        p = ProductFactory(slug="multi-cl1", shape="round")
+        ProductVariantFactory(product=p, sku="A-CL1", classe="CL1", is_active=True)
+        ProductVariantFactory(product=p, sku="B-CL1", classe="CL1", is_active=True)
+
+        response = client.get(self.url, {"classe": "CL1"})
+
+        data = response.json()
+        assert data["count"] == 1
+
+    def test_shape_and_classe_combined(self, client):
+        match = ProductFactory(slug="match", shape="triangle")
+        wrong_shape = ProductFactory(slug="wrong-shape", shape="round")
+        ProductVariantFactory(product=match, sku="M-CL2", classe="CL2", is_active=True)
+        ProductVariantFactory(product=wrong_shape, sku="WS-CL2", classe="CL2", is_active=True)
+
+        response = client.get(self.url, {"shape": "triangle", "classe": "CL2"})
+
+        data = response.json()
+        assert data["count"] == 1
+        assert data["results"][0]["slug"] == "match"
+
+
+@pytest.mark.django_db
+class TestProductFiltersView:
+    url = "/api/products/filters/"
+
+    def test_returns_shapes_and_classes_keys(self, client, db):
+        response = client.get(self.url)
+
+        assert response.status_code == 200
+        data = response.json()
+        assert set(data.keys()) == {"shapes", "classes"}
+
+    def test_shapes_are_counted_and_labelled(self, client):
+        ProductFactory(slug="s1", shape="square")
+        ProductFactory(slug="s2", shape="square")
+        ProductFactory(slug="t1", shape="triangle")
+
+        response = client.get(self.url)
+
+        shapes = {s["value"]: s for s in response.json()["shapes"]}
+        assert shapes["square"] == {"value": "square", "label": "Indication", "count": 2}
+        assert shapes["triangle"]["label"] == "Danger"
+        assert shapes["triangle"]["count"] == 1
+
+    def test_shapes_ordered_by_count_desc(self, client):
+        ProductFactory(slug="r1", shape="round")
+        ProductFactory(slug="r2", shape="round")
+        ProductFactory(slug="r3", shape="round")
+        ProductFactory(slug="tt1", shape="triangle")
+
+        response = client.get(self.url)
+
+        counts = [s["count"] for s in response.json()["shapes"]]
+        assert counts == sorted(counts, reverse=True)
+
+    def test_unknown_shape_excluded(self, client):
+        ProductFactory(slug="u1", shape="unknown")
+        ProductFactory(slug="sq", shape="square")
+
+        response = client.get(self.url)
+
+        values = {s["value"] for s in response.json()["shapes"]}
+        assert "unknown" not in values
+        assert "square" in values
+
+    def test_unmapped_shape_excluded(self, client):
+        """Shapes without a family label (e.g. octagon) are not surfaced."""
+        ProductFactory(slug="oct", shape="octagon")
+        ProductFactory(slug="sq2", shape="square")
+
+        response = client.get(self.url)
+
+        values = {s["value"] for s in response.json()["shapes"]}
+        assert "octagon" not in values
+        assert "square" in values
+
+    def test_inactive_products_not_counted(self, client):
+        ProductFactory(slug="active-sq", shape="square")
+        ProductFactory(slug="inactive-sq", shape="square", is_active=False)
+
+        response = client.get(self.url)
+
+        shapes = {s["value"]: s for s in response.json()["shapes"]}
+        assert shapes["square"]["count"] == 1
+
+    def test_classes_are_static(self, client, db):
+        response = client.get(self.url)
+
+        assert response.json()["classes"] == [
+            {"value": "CL1", "label": "Classe 1"},
+            {"value": "CL2", "label": "Classe 2"},
+        ]
+
+    def test_filters_path_not_shadowed_by_slug_route(self, client, db):
+        """`products/filters/` must resolve to the filters view, not a 404 slug."""
+        response = client.get(self.url)
+        assert response.status_code == 200
+        assert "shapes" in response.json()
+
+
+@pytest.mark.django_db
 class TestProductDetailView:
     def test_api_returns_product_detail(self, client, test_product):
         # Act

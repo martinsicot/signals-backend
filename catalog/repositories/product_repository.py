@@ -13,7 +13,13 @@ class ProductRepository:
             .get(slug=slug, is_active=True)
         )
 
-    def list_active_products(self, category_slug: str | None = None, q: str | None = None):
+    def list_active_products(
+        self,
+        category_slug: str | None = None,
+        q: str | None = None,
+        shape: str | None = None,
+        classe: str | None = None,
+    ):
         qs = (
             Product.objects
             .filter(is_active=True)
@@ -24,6 +30,10 @@ class ProductRepository:
             qs = qs.filter(category__slug=category_slug)
         if q:
             qs = qs.filter(name__icontains=q) | qs.filter(description__icontains=q)
+        if shape:
+            qs = qs.filter(shape=shape)
+        if classe:
+            qs = qs.filter(variants__classe=classe, variants__is_active=True).distinct()
         return qs
 
     # --- ProductVariant ---
