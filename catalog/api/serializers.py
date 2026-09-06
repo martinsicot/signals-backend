@@ -33,14 +33,17 @@ def _absolute(request, url):
 
 
 class ProductListSerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(source="category.name", read_only=True)
+    categories = serializers.SerializerMethodField()
     min_price = serializers.SerializerMethodField()
     thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ["id", "name", "slug", "base_code", "type", "category_name",
+        fields = ["id", "name", "slug", "base_code", "type", "categories",
                   "image", "thumbnail", "min_price", "is_active"]
+
+    def get_categories(self, obj):
+        return [{"id": c.id, "name": c.name, "slug": c.slug} for c in obj.categories.all()]
 
     def get_min_price(self, obj):
         prices = [v.price for v in obj.variants.all() if v.price is not None]
@@ -52,7 +55,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
+    categories = CategorySerializer(many=True, read_only=True)
     variants = ProductVariantSerializer(many=True, read_only=True)
     thumbnail = serializers.SerializerMethodField()
     thumbnail_lg = serializers.SerializerMethodField()
@@ -60,7 +63,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            "id", "name", "slug", "base_code", "type", "category",
+            "id", "name", "slug", "base_code", "type", "categories",
             "description", "image", "thumbnail", "thumbnail_lg", "is_active",
             "meta_title", "meta_description",
             "variants",
