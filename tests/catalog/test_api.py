@@ -17,8 +17,9 @@ class TestProductListView:
         # Assert
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["slug"] == "stop-sign"
+        assert data["count"] == 1
+        assert len(data["results"]) == 1
+        assert data["results"][0]["slug"] == "stop-sign"
 
     def test_api_filters_by_category(self, client, test_product, test_category):
         # Act
@@ -26,7 +27,7 @@ class TestProductListView:
 
         # Assert
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert response.json()["count"] == 1
 
     def test_api_excludes_inactive_products(self, client, test_product):
         # Arrange
@@ -38,7 +39,76 @@ class TestProductListView:
 
         # Assert
         assert response.status_code == 200
-        assert len(response.json()) == 0
+        assert response.json()["count"] == 0
+
+
+@pytest.mark.django_db
+class TestProductListPagination:
+    url = "/api/products/"
+
+    def test_response_has_pagination_envelope(self, client, test_product):
+        response = client.get(self.url)
+
+        assert response.status_code == 200
+        data = response.json()
+        assert set(data.keys()) == {"count", "next", "previous", "results"}
+
+    def test_page_size_is_24(self, client):
+        ProductFactory.create_batch(30)
+
+        response = client.get(self.url)
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["count"] == 30
+        assert len(data["results"]) == 24
+
+    def test_next_link_present_when_more_pages(self, client):
+        ProductFactory.create_batch(30)
+
+        response = client.get(self.url)
+
+        data = response.json()
+        assert data["next"] is not None
+        assert data["previous"] is None
+
+    def test_second_page_returns_remaining_products(self, client):
+        ProductFactory.create_batch(30)
+
+        response = client.get(self.url, {"page": 2})
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["results"]) == 6
+        assert data["next"] is None
+        assert data["previous"] is not None
+
+    def test_single_page_has_no_next_or_previous(self, client):
+        ProductFactory.create_batch(5)
+
+        response = client.get(self.url)
+
+        data = response.json()
+        assert data["count"] == 5
+        assert data["next"] is None
+        assert data["previous"] is None
+
+    def test_out_of_range_page_returns_404(self, client):
+        ProductFactory.create_batch(5)
+
+        response = client.get(self.url, {"page": 99})
+
+        assert response.status_code == 404
+
+    def test_pagination_preserves_filters_in_links(self, client):
+        cat = CategoryFactory(slug="cat-paginated")
+        ProductFactory.create_batch(30, category=cat)
+
+        response = client.get(self.url, {"category": "cat-paginated"})
+
+        data = response.json()
+        assert data["count"] == 30
+        assert "category=cat-paginated" in data["next"]
 
 
 @pytest.mark.django_db
@@ -52,8 +122,8 @@ class TestProductSearchView:
         response = client.get(self.url, {"q": "stop"})
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["slug"] == "panneau-stop"
+        assert data["count"] == 1
+        assert data["results"][0]["slug"] == "panneau-stop"
 
     def test_returns_matching_products_by_description(self, client):
         ProductFactory(slug="p1", description="panneau octogonal rouge obligatoire")
@@ -61,21 +131,21 @@ class TestProductSearchView:
 
         response = client.get(self.url, {"q": "octogonal"})
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert response.json()["count"] == 1
 
     def test_search_is_case_insensitive(self, client):
         ProductFactory(name="Panneau Stop", slug="panneau-stop-ci")
 
         response = client.get(self.url, {"q": "STOP"})
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert response.json()["count"] == 1
 
     def test_returns_empty_list_when_no_match(self, client):
         ProductFactory(name="Panneau Stop", slug="panneau-stop-nomatch")
 
         response = client.get(self.url, {"q": "cédez"})
         assert response.status_code == 200
-        assert response.json() == []
+        assert response.json()["results"] == []
 
     def test_blank_q_returns_all_products(self, client):
         ProductFactory(slug="p-a")
@@ -83,7 +153,7 @@ class TestProductSearchView:
 
         response = client.get(self.url, {"q": "  "})
         assert response.status_code == 200
-        assert len(response.json()) >= 2
+        assert response.json()["count"] >= 2
 
     def test_search_combined_with_category_filter(self, client):
         cat_a = CategoryFactory(slug="cat-a")
@@ -94,15 +164,15 @@ class TestProductSearchView:
         response = client.get(self.url, {"q": "stop", "category": "cat-a"})
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["slug"] == "stop-fr"
+        assert data["count"] == 1
+        assert data["results"][0]["slug"] == "stop-fr"
 
     def test_excludes_inactive_products_from_search(self, client):
         ProductFactory(name="Panneau Stop", slug="stop-inactive", is_active=False)
 
         response = client.get(self.url, {"q": "stop"})
         assert response.status_code == 200
-        assert response.json() == []
+        assert response.json()["results"] == []
 
 
 @pytest.mark.django_db
@@ -153,7 +223,7 @@ class TestProductListMinPrice:
 
         # Assert
         assert response.status_code == 200
-        row = next(p for p in response.json() if p["slug"] == test_product.slug)
+        row = next(p for p in response.json()["results"] if p["slug"] == test_product.slug)
         assert row["min_price"] == "19.90"
 
     def test_min_price_is_null_when_no_priced_variant(self, client, test_product):
@@ -164,7 +234,7 @@ class TestProductListMinPrice:
         response = client.get("/api/products/")
 
         # Assert
-        row = next(p for p in response.json() if p["slug"] == test_product.slug)
+        row = next(p for p in response.json()["results"] if p["slug"] == test_product.slug)
         assert row["min_price"] is None
 
 

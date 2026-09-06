@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from ..models import Category, Product, ProductVariant
 from ..repositories.product_repository import ProductRepository
@@ -29,7 +30,12 @@ class ProductListView(APIView):
         category_slug = request.query_params.get("category")
         q = request.query_params.get("q", "").strip() or None
         products = product_repo.list_active_products(category_slug=category_slug, q=q)
-        return Response(ProductListSerializer(products, many=True, context={"request": request}).data)
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 24  # grille 4×6, plus naturel que 20
+        page = paginator.paginate_queryset(products, request)
+        serializer = ProductListSerializer(page, many=True, context={"request": request})
+        return paginator.get_paginated_response(serializer.data)
 
 
 class ProductDetailView(APIView):
