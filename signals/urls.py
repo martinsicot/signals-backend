@@ -4,7 +4,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 
 def health(request):
@@ -21,11 +20,7 @@ def handler500(request):
 urlpatterns = [
     path("health/", health, name="health"),
     path("admin/", admin.site.urls),
-    # JWT auth
-    path("api/auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("api/auth/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
-    # API — customer-facing
+    # API — customer-facing (auth + JWT token endpoints live in accounts.api.urls)
     path("api/", include("accounts.api.urls")),
     path("api/", include("catalog.api.urls")),
     path("api/", include("orders.api.urls")),

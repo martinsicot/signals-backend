@@ -11,22 +11,26 @@ from tests.factories import AddressFactory, CustomerFactory
 class TestRegisterView:
     url = "/api/auth/register/"
 
-    def test_returns_201_on_valid_registration(self, client):
+    def test_returns_201_with_token_pair(self, client):
         response = client.post(self.url, data={
             "email": "new@example.com",
             "password": "securepass123",
+            "password_confirm": "securepass123",
             "first_name": "Marie",
             "last_name": "Martin",
         }, content_type="application/json")
 
         assert response.status_code == 201
-        assert response.json()["email"] == "new@example.com"
+        body = response.json()
+        assert body["access"]
+        assert body["refresh"]
 
     def test_assigns_customer_group_on_registration(self, client):
         from django.contrib.auth import get_user_model
         client.post(self.url, data={
             "email": "grouped@example.com",
             "password": "securepass123",
+            "password_confirm": "securepass123",
             "first_name": "A",
             "last_name": "B",
         }, content_type="application/json")
@@ -38,6 +42,7 @@ class TestRegisterView:
         response = client.post(self.url, data={
             "email": test_user.email,
             "password": "securepass123",
+            "password_confirm": "securepass123",
             "first_name": "Other",
             "last_name": "User",
         }, content_type="application/json")
@@ -49,11 +54,24 @@ class TestRegisterView:
         response = client.post(self.url, data={
             "email": "new@example.com",
             "password": "short",
+            "password_confirm": "short",
             "first_name": "Marie",
             "last_name": "Martin",
         }, content_type="application/json")
 
         assert response.status_code == 400
+
+    def test_returns_400_when_passwords_do_not_match(self, client):
+        response = client.post(self.url, data={
+            "email": "mismatch@example.com",
+            "password": "securepass123",
+            "password_confirm": "different456",
+            "first_name": "Marie",
+            "last_name": "Martin",
+        }, content_type="application/json")
+
+        assert response.status_code == 400
+        assert "password_confirm" in response.json()
 
 
 # ---------------------------------------------------------------------------
@@ -64,14 +82,17 @@ class TestRegisterView:
 class TestLoginView:
     url = "/api/auth/login/"
 
-    def test_returns_200_with_valid_credentials(self, client, test_user):
+    def test_returns_200_with_token_pair_and_user(self, client, test_user):
         response = client.post(self.url, data={
             "email": test_user.email,
             "password": "testpassword123",
         }, content_type="application/json")
 
         assert response.status_code == 200
-        assert response.json()["email"] == test_user.email
+        body = response.json()
+        assert body["access"]
+        assert body["refresh"]
+        assert body["user"]["email"] == test_user.email
 
     def test_returns_401_with_wrong_password(self, client, test_user):
         response = client.post(self.url, data={
@@ -80,6 +101,7 @@ class TestLoginView:
         }, content_type="application/json")
 
         assert response.status_code == 401
+        assert response.json() == {"detail": "Invalid credentials."}
 
     def test_staff_login_returns_groups(self, client, crm_user):
         response = client.post(self.url, data={
@@ -88,7 +110,18 @@ class TestLoginView:
         }, content_type="application/json")
 
         assert response.status_code == 200
-        assert "crm" in response.json()["groups"]
+        assert "crm" in response.json()["user"]["groups"]
+
+
+def _obtain_tokens(client, email, password="testpassword123"):
+    """Log in through the API and return the (access, refresh) token pair."""
+    response = client.post(
+        "/api/auth/login/",
+        data={"email": email, "password": password},
+        content_type="application/json",
+    )
+    body = response.json()
+    return body["access"], body["refresh"]
 
 
 # ---------------------------------------------------------------------------
@@ -99,12 +132,78 @@ class TestLoginView:
 class TestLogoutView:
     url = "/api/auth/logout/"
 
-    def test_returns_204_when_authenticated(self, authenticated_client):
-        response = authenticated_client.post(self.url)
-        assert response.status_code == 204
+    def test_returns_205_and_blacklists_refresh(self, client, test_user):
+        access, refresh = _obtain_tokens(client, test_user.email)
+
+        response = client.post(
+            self.url,
+            data={"refresh": refresh},
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {access}",
+        )
+        assert response.status_code == 205
+
+        # The blacklisted refresh token can no longer be refreshed.
+        refresh_response = client.post(
+            "/api/auth/token/refresh/",
+            data={"refresh": refresh},
+            content_type="application/json",
+        )
+        assert refresh_response.status_code == 401
+
+    def test_returns_400_when_refresh_missing(self, client, test_user):
+        access, _ = _obtain_tokens(client, test_user.email)
+
+        response = client.post(
+            self.url,
+            data={},
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {access}",
+        )
+        assert response.status_code == 400
+        assert "refresh" in response.json()
+
+    def test_returns_400_with_invalid_refresh(self, client, test_user):
+        access, _ = _obtain_tokens(client, test_user.email)
+
+        response = client.post(
+            self.url,
+            data={"refresh": "not-a-real-token"},
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {access}",
+        )
+        assert response.status_code == 400
 
     def test_returns_401_when_unauthenticated(self, client):
         response = client.post(self.url)
+        assert response.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Token refresh
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+class TestTokenRefreshView:
+    url = "/api/auth/token/refresh/"
+
+    def test_returns_new_access_token(self, client, test_user):
+        _, refresh = _obtain_tokens(client, test_user.email)
+
+        response = client.post(
+            self.url,
+            data={"refresh": refresh},
+            content_type="application/json",
+        )
+        assert response.status_code == 200
+        assert response.json()["access"]
+
+    def test_returns_401_with_invalid_refresh(self, client):
+        response = client.post(
+            self.url,
+            data={"refresh": "garbage"},
+            content_type="application/json",
+        )
         assert response.status_code == 401
 
 
@@ -182,3 +281,82 @@ class TestAddressListCreateView:
     def test_returns_401_when_unauthenticated(self, client):
         response = client.get(self.url)
         assert response.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Password reset
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+class TestPasswordResetRequestView:
+    url = "/api/auth/password-reset/"
+
+    def test_sends_email_for_known_address(self, client, test_user, mailoutbox):
+        response = client.post(self.url, data={
+            "email": test_user.email,
+        }, content_type="application/json")
+
+        assert response.status_code == 200
+        assert len(mailoutbox) == 1
+        assert test_user.email in mailoutbox[0].to
+
+    def test_returns_200_for_unknown_address_without_email(self, client, mailoutbox):
+        response = client.post(self.url, data={
+            "email": "nobody@example.com",
+        }, content_type="application/json")
+
+        # Always 200 to avoid account enumeration, but no email is sent.
+        assert response.status_code == 200
+        assert len(mailoutbox) == 0
+
+    def test_returns_400_when_email_missing(self, client):
+        response = client.post(self.url, data={}, content_type="application/json")
+
+        assert response.status_code == 400
+        assert "email" in response.json()
+
+
+@pytest.mark.django_db
+class TestPasswordResetConfirmView:
+    url = "/api/auth/password-reset/confirm/"
+
+    def _uid_and_token(self, user):
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.encoding import force_bytes
+        from django.utils.http import urlsafe_base64_encode
+
+        return (
+            urlsafe_base64_encode(force_bytes(user.pk)),
+            default_token_generator.make_token(user),
+        )
+
+    def test_resets_password_with_valid_token(self, client, test_user):
+        uid, token = self._uid_and_token(test_user)
+
+        response = client.post(self.url, data={
+            "uid": uid,
+            "token": token,
+            "new_password": "brandnewpass456",
+        }, content_type="application/json")
+
+        assert response.status_code == 200
+        test_user.refresh_from_db()
+        assert test_user.check_password("brandnewpass456")
+
+    def test_returns_400_with_invalid_token(self, client, test_user):
+        uid, _ = self._uid_and_token(test_user)
+
+        response = client.post(self.url, data={
+            "uid": uid,
+            "token": "invalid-token",
+            "new_password": "brandnewpass456",
+        }, content_type="application/json")
+
+        assert response.status_code == 400
+        assert "detail" in response.json()
+
+    def test_returns_400_when_fields_missing(self, client):
+        response = client.post(self.url, data={}, content_type="application/json")
+
+        assert response.status_code == 400
+        assert "detail" in response.json()
