@@ -54,6 +54,11 @@ class Customer(models.Model):
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.user.email})"
 
+    @property
+    def default_shipping_address(self):
+        """The customer's default address, falling back to their first one."""
+        return self.addresses.filter(is_default=True).first() or self.addresses.first()
+
 
 class Address(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="addresses")

@@ -233,6 +233,124 @@ class TestMeView:
 
 
 # ---------------------------------------------------------------------------
+# Account profile (GET / PATCH /api/account/me/)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+class TestProfileView:
+    url = "/api/account/me/"
+
+    def test_returns_401_when_unauthenticated(self, client):
+        response = client.get(self.url)
+        assert response.status_code == 401
+
+    def test_returns_403_for_non_customer(self, crm_client):
+        response = crm_client.get(self.url)
+        assert response.status_code == 403
+
+    def test_get_returns_profile_shape(self, client, customer):
+        AddressFactory(
+            customer=customer,
+            line1="12 rue des Acacias",
+            line2="",
+            postal_code="75001",
+            city="Paris",
+            country="FR",
+            is_default=True,
+        )
+        client.force_login(customer.user)
+
+        response = client.get(self.url)
+        assert response.status_code == 200
+        body = response.json()
+        assert body["id"] == customer.user.id
+        assert body["email"] == customer.user.email
+        assert body["phone"] == customer.phone
+        assert body["default_shipping_address"] == {
+            "line1": "12 rue des Acacias",
+            "line2": "",
+            "zip_code": "75001",
+            "city": "Paris",
+            "country": "FR",
+        }
+
+    def test_get_returns_null_address_when_none(self, authenticated_client):
+        response = authenticated_client.get(self.url)
+        assert response.status_code == 200
+        assert response.json()["default_shipping_address"] is None
+
+    def test_patch_updates_name_and_phone(self, client, customer):
+        client.force_login(customer.user)
+
+        response = client.patch(self.url, data={
+            "first_name": "Martin",
+            "last_name": "Sicot",
+            "phone": "0612345678",
+        }, content_type="application/json")
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["first_name"] == "Martin"
+        assert body["last_name"] == "Sicot"
+        assert body["phone"] == "0612345678"
+
+        customer.refresh_from_db()
+        customer.user.refresh_from_db()
+        assert customer.user.first_name == "Martin"
+        assert customer.phone == "0612345678"
+
+    def test_patch_email_is_ignored(self, client, customer):
+        original_email = customer.user.email
+        client.force_login(customer.user)
+
+        response = client.patch(self.url, data={
+            "email": "hacker@example.com",
+        }, content_type="application/json")
+
+        assert response.status_code == 200
+        assert response.json()["email"] == original_email
+        customer.user.refresh_from_db()
+        assert customer.user.email == original_email
+
+    def test_patch_creates_default_address_when_none(self, client, customer):
+        client.force_login(customer.user)
+
+        response = client.patch(self.url, data={
+            "default_shipping_address": {
+                "line1": "1 rue de Rivoli",
+                "zip_code": "75004",
+                "city": "Paris",
+                "country": "FR",
+            },
+        }, content_type="application/json")
+
+        assert response.status_code == 200
+        assert response.json()["default_shipping_address"]["zip_code"] == "75004"
+
+        address = customer.addresses.get()
+        assert address.postal_code == "75004"
+        assert address.is_default is True
+
+    def test_patch_updates_existing_default_address(self, client, customer):
+        AddressFactory(customer=customer, postal_code="75001", is_default=True)
+        client.force_login(customer.user)
+
+        response = client.patch(self.url, data={
+            "default_shipping_address": {
+                "line1": "9 avenue des Champs",
+                "zip_code": "75008",
+                "city": "Paris",
+            },
+        }, content_type="application/json")
+
+        assert response.status_code == 200
+        assert customer.addresses.count() == 1
+        address = customer.addresses.get()
+        assert address.postal_code == "75008"
+        assert address.line1 == "9 avenue des Champs"
+
+
+# ---------------------------------------------------------------------------
 # Addresses (customer self-service)
 # ---------------------------------------------------------------------------
 
