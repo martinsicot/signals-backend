@@ -14,6 +14,81 @@ class AddressSerializer(serializers.ModelSerializer):
         ]
 
 
+class ProfileAddressSerializer(serializers.ModelSerializer):
+    """Shipping address as exposed on the account profile.
+
+    Uses ``zip_code`` on the wire while the model stores ``postal_code``.
+    """
+
+    zip_code = serializers.CharField(source="postal_code", max_length=20)
+
+    class Meta:
+        model = Address
+        fields = ["line1", "line2", "zip_code", "city", "country"]
+        extra_kwargs = {
+            "line2": {"required": False, "allow_blank": True},
+            "country": {"required": False},
+        }
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    """Profile of the connected customer (GET/PATCH /api/account/me/).
+
+    ``first_name``/``last_name``/``email`` live on the ``User``; ``phone`` on the
+    ``Customer``; the shipping address on the customer's default ``Address``.
+    Email is read-only (changing it requires separate verification).
+    """
+
+    id = serializers.IntegerField(source="user.id", read_only=True)
+    email = serializers.EmailField(source="user.email", read_only=True)
+    first_name = serializers.CharField(
+        source="user.first_name", required=False, allow_blank=True, max_length=150
+    )
+    last_name = serializers.CharField(
+        source="user.last_name", required=False, allow_blank=True, max_length=150
+    )
+    default_shipping_address = ProfileAddressSerializer(required=False, allow_null=True)
+
+    class Meta:
+        model = Customer
+        fields = [
+            "id", "email", "first_name", "last_name", "phone",
+            "default_shipping_address",
+        ]
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop("user", {})
+        address_data = validated_data.pop("default_shipping_address", None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if user_data:
+            user = instance.user
+            for attr, value in user_data.items():
+                setattr(user, attr, value)
+            user.save()
+
+        if address_data:
+            self._upsert_default_address(instance, address_data)
+
+        return instance
+
+    def _upsert_default_address(self, customer, data):
+        address = customer.default_shipping_address
+        if address is None:
+            address = Address(
+                customer=customer,
+                first_name=customer.user.first_name,
+                last_name=customer.user.last_name,
+            )
+        for attr, value in data.items():
+            setattr(address, attr, value)
+        address.is_default = True
+        address.save()
+
+
 class CustomerSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source="user.email", read_only=True)
     first_name = serializers.CharField(source="user.first_name", read_only=True)

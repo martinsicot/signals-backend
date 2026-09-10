@@ -18,6 +18,8 @@ Schéma interactif : `/api/docs/` (Swagger) et `/api/redoc/`.
 | POST | `/api/auth/password-reset/` | — | Envoi de l'email de réinitialisation |
 | POST | `/api/auth/password-reset/confirm/` | — | Définition du nouveau mot de passe |
 | GET  | `/api/auth/me/` | Bearer | Profil de l'utilisateur courant |
+| GET  | `/api/account/me/` | Bearer | Profil client (nom, téléphone, adresse) |
+| PATCH | `/api/account/me/` | Bearer | Modifier le profil client |
 
 ### POST `/api/auth/register/`
 Requête :
@@ -56,6 +58,36 @@ Un email n'est envoyé que si le compte existe.
 ### POST `/api/auth/password-reset/confirm/`
 Requête : `{ "uid": "...", "token": "...", "new_password": "..." }`
 Réponse `200`. `uid`/`token` proviennent du lien envoyé par email.
+
+### GET `/api/account/me/`
+En-tête `Authorization: Bearer <access>`. Réservé aux comptes `customer`
+(`403` pour un compte CRM/ops, `401` sans token).
+Réponse `200` :
+```json
+{
+  "id": 1,
+  "email": "martin@example.com",
+  "first_name": "Martin",
+  "last_name": "Sicot",
+  "phone": "0612345678",
+  "default_shipping_address": {
+    "line1": "12 rue des Acacias",
+    "line2": "",
+    "zip_code": "75001",
+    "city": "Paris",
+    "country": "FR"
+  }
+}
+```
+`default_shipping_address` vaut `null` si le client n'a aucune adresse.
+
+### PATCH `/api/account/me/`
+En-tête `Authorization: Bearer <access>`. Champs modifiables :
+`first_name`, `last_name`, `phone`, `default_shipping_address`.
+L'`email` est **en lecture seule** (une vérification séparée serait requise).
+Mettre à jour `default_shipping_address` modifie (ou crée) l'adresse par défaut
+du client.
+Réponse `200` : le profil mis à jour (même format que le GET).
 
 ## Réponses d'erreur
 

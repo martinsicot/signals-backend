@@ -13,6 +13,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import (
     AddressSerializer,
     CustomerSerializer,
+    ProfileSerializer,
     RegisterSerializer,
     StaffUserSerializer,
     UserSerializer,
@@ -96,6 +97,24 @@ class MeView(APIView):
         if hasattr(request.user, "customer"):
             return Response(CustomerSerializer(request.user.customer).data)
         return Response(StaffUserSerializer(request.user).data)
+
+
+class ProfileView(APIView):
+    """Profile of the connected customer — read and partial update."""
+
+    permission_classes = [IsCustomer]
+
+    def get(self, request):
+        return Response(ProfileSerializer(request.user.customer).data)
+
+    def patch(self, request):
+        serializer = ProfileSerializer(
+            request.user.customer, data=request.data, partial=True
+        )
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data)
 
 
 class AddressListCreateView(APIView):
