@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model, authenticate, login, logout
+from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import Group
@@ -8,11 +8,25 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
-from .serializers import CustomerSerializer, RegisterSerializer, AddressSerializer, StaffUserSerializer
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import (
+    AddressSerializer,
+    CustomerSerializer,
+    RegisterSerializer,
+    StaffUserSerializer,
+    UserSerializer,
+)
 from ..models import Customer, Address
 from ..permissions import IsCustomer
 
 User = get_user_model()
+
+
+def _tokens_for_user(user):
+    """Issue an access/refresh token pair for the given user."""
+    refresh = RefreshToken.for_user(user)
+    return {"access": str(refresh.access_token), "refresh": str(refresh)}
 
 
 class RegisterView(APIView):
@@ -39,9 +53,8 @@ class RegisterView(APIView):
         customer_group = Group.objects.filter(name="customer").first()
         if customer_group:
             user.groups.add(customer_group)
-        customer = Customer.objects.create(user=user, phone=data.get("phone", ""))
-        login(request, user)
-        return Response(CustomerSerializer(customer).data, status=status.HTTP_201_CREATED)
+        Customer.objects.create(user=user, phone=data.get("phone", ""))
+        return Response(_tokens_for_user(user), status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
@@ -53,16 +66,27 @@ class LoginView(APIView):
         user = authenticate(request, email=email, password=password)
         if user is None:
             return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
-        login(request, user)
-        if hasattr(user, "customer"):
-            return Response(CustomerSerializer(user.customer).data)
-        return Response(StaffUserSerializer(user).data)
+        return Response({**_tokens_for_user(user), "user": UserSerializer(user).data})
 
 
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
-        logout(request)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        refresh = request.data.get("refresh")
+        if not refresh:
+            return Response(
+                {"refresh": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            RefreshToken(refresh).blacklist()
+        except TokenError:
+            return Response(
+                {"detail": "Invalid or expired token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_205_RESET_CONTENT)
 
 
 class MeView(APIView):
@@ -117,7 +141,7 @@ class PasswordResetConfirmView(APIView):
 
         if not all([uidb64, token, new_password]):
             return Response(
-                {"error": "uid, token and new_password are required."},
+                {"detail": "uid, token and new_password are required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -125,10 +149,10 @@ class PasswordResetConfirmView(APIView):
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
         except (TypeError, ValueError, User.DoesNotExist):
-            return Response({"error": "Invalid reset link."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Invalid reset link."}, status=status.HTTP_400_BAD_REQUEST)
 
         if not default_token_generator.check_token(user, token):
-            return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
 
         form = SetPasswordForm(user, {"new_password1": new_password, "new_password2": new_password})
         if not form.is_valid():

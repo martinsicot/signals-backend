@@ -35,9 +35,27 @@ class StaffUserSerializer(serializers.ModelSerializer):
         fields = ["id", "email", "first_name", "last_name", "groups", "is_staff"]
 
 
+class UserSerializer(serializers.ModelSerializer):
+    """Compact user representation embedded in the login response."""
+
+    groups = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
+
+    class Meta:
+        model = User
+        fields = ["id", "email", "first_name", "last_name", "groups"]
+
+
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=8)
+    password_confirm = serializers.CharField(write_only=True)
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
     phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["password_confirm"]:
+            raise serializers.ValidationError(
+                {"password_confirm": ["Passwords do not match."]}
+            )
+        return attrs
