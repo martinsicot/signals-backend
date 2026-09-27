@@ -153,6 +153,7 @@ class Command(BaseCommand):
                             "poids_kg": poids_kg,
                             "poids_note": poids_note,
                             "rails_mm": row["specs"].get("rails_mm") or "",
+                            "rails_count": row["specs"].get("rails_count"),
                             "transport_dpd": row["specs"].get("transport_dpd") or "",
                             "transport_palette": row["specs"].get("transport_palette") or "",
                         },

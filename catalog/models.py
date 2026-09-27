@@ -89,6 +89,7 @@ class PriceScheduleSize(models.Model):
     poids_kg = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True)
     poids_note = models.CharField(max_length=50, blank=True)  # e.g. "Au sol"
     rails_mm = models.CharField(max_length=50, blank=True)  # e.g. "150/300"
+    rails_count = models.PositiveSmallIntegerField(null=True, blank=True)  # 2 or 3 depending on size
     transport_dpd = models.CharField(max_length=100, blank=True)
     transport_palette = models.CharField(max_length=100, blank=True)
 
