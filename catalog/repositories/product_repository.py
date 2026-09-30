@@ -27,7 +27,7 @@ class ProductRepository:
         if category_slug:
             qs = qs.filter(categories__slug=category_slug)
         if q:
-            qs = qs.filter(name__icontains=q) | qs.filter(description__icontains=q)
+            qs = qs.filter(name__icontains=q) | qs.filter(description__icontains=q) | qs.filter(slug__icontains=q)
         if shape:
             qs = qs.filter(shape=shape)
         if classe:
