@@ -39,7 +39,7 @@ class PaymentService:
             payment_method_types=["card"],
             line_items=line_items,
             mode="payment",
-            ui_mode="embedded",
+            ui_mode="embedded_page",
             return_url=return_url,
             metadata={"order_id": str(order_id)},
             customer_email=order.guest_email or None,
