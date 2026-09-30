@@ -106,6 +106,9 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             if options["clear"]:
+                from orders.models import OrderLineModel, OrderModel
+                OrderLineModel.objects.all().delete()
+                OrderModel.objects.all().delete()
                 ProductVariantAttribute.objects.all().delete()
                 ProductVariant.objects.all().delete()
                 Product.objects.all().delete()
