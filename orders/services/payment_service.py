@@ -10,7 +10,7 @@ class PaymentService:
     def __init__(self):
         self.order_repo = OrderRepository()
 
-    def create_checkout_session(self, order_id: int, success_url: str, cancel_url: str) -> str:
+    def create_checkout_session(self, order_id: int, return_url: str) -> str:
         order = self.order_repo.get_by_id(order_id)
 
         line_items = [
@@ -39,14 +39,14 @@ class PaymentService:
             payment_method_types=["card"],
             line_items=line_items,
             mode="payment",
-            success_url=success_url,
-            cancel_url=cancel_url,
+            ui_mode="embedded",
+            return_url=return_url,
             metadata={"order_id": str(order_id)},
             customer_email=order.guest_email or None,
         )
 
         self.order_repo.update_stripe_session(order_id, session.id)
-        return session.url
+        return session.client_secret
 
     def handle_webhook(self, payload: bytes, sig_header: str) -> str | None:
         """Process a Stripe webhook event. Returns the event type handled."""
