@@ -9,29 +9,24 @@ from notifications.tasks import send_payment_confirmation
 
 
 class CreateCheckoutSessionView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request, order_id):
-        success_url = request.data.get(
-            "success_url",
-            f"{request.scheme}://{request.get_host()}/order/{order_id}/confirmation",
-        )
-        cancel_url = request.data.get(
-            "cancel_url",
-            f"{request.scheme}://{request.get_host()}/cart",
+        return_url = request.data.get(
+            "return_url",
+            f"{request.scheme}://{request.get_host()}/checkout/confirmation?session_id={{CHECKOUT_SESSION_ID}}",
         )
 
         service = PaymentService()
         try:
-            checkout_url = service.create_checkout_session(
+            client_secret = service.create_checkout_session(
                 order_id=order_id,
-                success_url=success_url,
-                cancel_url=cancel_url,
+                return_url=return_url,
             )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"checkout_url": checkout_url})
+        return Response({"client_secret": client_secret})
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -55,8 +50,14 @@ class StripeWebhookView(APIView):
             from ..models import OrderModel
             import json
             body = json.loads(request.body)
-            order_id = int(body["data"]["object"].get("metadata", {}).get("order_id", 0))
+            session_obj = body["data"]["object"]
+            order_id = int(session_obj.get("metadata", {}).get("order_id", 0))
             if order_id:
+                shipping = session_obj.get("shipping_details") or {}
+                if shipping:
+                    OrderModel.objects.filter(id=order_id).update(
+                        shipping_address_snapshot=shipping
+                    )
                 send_payment_confirmation.delay(order_id)
 
         return Response({"status": "ok"})
