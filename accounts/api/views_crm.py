@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,6 +16,7 @@ class CRMCustomerListView(APIView):
 
     permission_classes = [IsCRMOrOps]
 
+    @extend_schema(responses={200: CustomerSerializer(many=True)})
     def get(self, request):
         qs = Customer.objects.select_related("user").prefetch_related("addresses")
         email = request.query_params.get("email")
@@ -28,6 +30,7 @@ class CRMCustomerDetailView(APIView):
 
     permission_classes = [IsCRMOrOps]
 
+    @extend_schema(responses={200: CustomerSerializer})
     def get(self, request, customer_id):
         customer = get_object_or_404(
             Customer.objects.select_related("user").prefetch_related("addresses"),
@@ -41,11 +44,13 @@ class CRMAddressListView(APIView):
 
     permission_classes = [IsCRM]
 
+    @extend_schema(responses={200: AddressSerializer(many=True)})
     def get(self, request, customer_id):
         customer = get_object_or_404(Customer, pk=customer_id)
         addresses = customer.addresses.all()
         return Response(AddressSerializer(addresses, many=True).data)
 
+    @extend_schema(request=AddressSerializer, responses={201: AddressSerializer})
     def post(self, request, customer_id):
         customer = get_object_or_404(Customer, pk=customer_id)
         serializer = AddressSerializer(data=request.data)
@@ -63,10 +68,12 @@ class CRMAddressDetailView(APIView):
     def _get_address(self, customer_id, address_id):
         return get_object_or_404(Address, pk=address_id, customer_id=customer_id)
 
+    @extend_schema(responses={200: AddressSerializer})
     def get(self, request, customer_id, address_id):
         address = self._get_address(customer_id, address_id)
         return Response(AddressSerializer(address).data)
 
+    @extend_schema(request=AddressSerializer, responses={200: AddressSerializer})
     def patch(self, request, customer_id, address_id):
         address = self._get_address(customer_id, address_id)
         serializer = AddressSerializer(address, data=request.data, partial=True)
@@ -75,6 +82,7 @@ class CRMAddressDetailView(APIView):
         serializer.save()
         return Response(serializer.data)
 
+    @extend_schema(responses={204: None})
     def delete(self, request, customer_id, address_id):
         address = self._get_address(customer_id, address_id)
         address.delete()

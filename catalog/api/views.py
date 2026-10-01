@@ -1,8 +1,9 @@
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import fields as f, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.pagination import PageNumberPagination
-from rest_framework import status
 from django.db.models import Count
 from ..models import Category, Product, ProductVariant
 from ..repositories.product_repository import ProductRepository
@@ -19,6 +20,7 @@ product_repo = ProductRepository()
 class CategoryListView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(responses={200: CategorySerializer(many=True)})
     def get(self, request):
         categories = Category.objects.all()
         return Response(CategorySerializer(categories, many=True).data)
@@ -27,6 +29,7 @@ class CategoryListView(APIView):
 class ProductListView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(responses={200: ProductListSerializer(many=True)})
     def get(self, request):
         category_slug = request.query_params.get("category")
         q = request.query_params.get("q", "").strip() or None
@@ -54,6 +57,17 @@ class ProductFiltersView(APIView):
         "rect": "Localisation",
     }
 
+    @extend_schema(
+        responses={
+            200: inline_serializer(
+                name="ProductFilters",
+                fields={
+                    "shapes": f.ListField(),
+                    "classes": f.ListField(),
+                },
+            )
+        }
+    )
     def get(self, request):
         shapes = (
             Product.objects
@@ -83,6 +97,7 @@ class ProductFiltersView(APIView):
 class ProductDetailView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(responses={200: ProductDetailSerializer})
     def get(self, request, slug):
         try:
             product = product_repo.get_product_by_slug(slug)
@@ -94,6 +109,7 @@ class ProductDetailView(APIView):
 class ProductVariantDetailView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(responses={200: ProductVariantDetailSerializer})
     def get(self, request, pk):
         try:
             variant = product_repo.get_variant_by_id(pk)

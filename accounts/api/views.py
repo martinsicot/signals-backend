@@ -4,10 +4,11 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import Group
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import fields as f, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework import status
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import (
@@ -30,9 +31,24 @@ def _tokens_for_user(user):
     return {"access": str(refresh.access_token), "refresh": str(refresh)}
 
 
+_TokensSerializer = inline_serializer(
+    name="Tokens",
+    fields={"access": f.CharField(), "refresh": f.CharField()},
+)
+_TokensWithUserSerializer = inline_serializer(
+    name="TokensWithUser",
+    fields={"access": f.CharField(), "refresh": f.CharField(), "user": UserSerializer()},
+)
+_DetailSerializer = inline_serializer(
+    name="Detail",
+    fields={"detail": f.CharField()},
+)
+
+
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(request=RegisterSerializer, responses={201: _TokensSerializer})
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if not serializer.is_valid():
@@ -61,6 +77,13 @@ class RegisterView(APIView):
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        request=inline_serializer(
+            name="LoginRequest",
+            fields={"email": f.EmailField(), "password": f.CharField()},
+        ),
+        responses={200: _TokensWithUserSerializer},
+    )
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -73,6 +96,10 @@ class LoginView(APIView):
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=inline_serializer(name="LogoutRequest", fields={"refresh": f.CharField()}),
+        responses={205: None},
+    )
     def post(self, request):
         refresh = request.data.get("refresh")
         if not refresh:
@@ -93,6 +120,7 @@ class LogoutView(APIView):
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses={200: CustomerSerializer})
     def get(self, request):
         if hasattr(request.user, "customer"):
             return Response(CustomerSerializer(request.user.customer).data)
@@ -104,9 +132,11 @@ class ProfileView(APIView):
 
     permission_classes = [IsCustomer]
 
+    @extend_schema(responses={200: ProfileSerializer})
     def get(self, request):
         return Response(ProfileSerializer(request.user.customer).data)
 
+    @extend_schema(request=ProfileSerializer, responses={200: ProfileSerializer})
     def patch(self, request):
         serializer = ProfileSerializer(
             request.user.customer, data=request.data, partial=True
@@ -120,10 +150,12 @@ class ProfileView(APIView):
 class AddressListCreateView(APIView):
     permission_classes = [IsCustomer]
 
+    @extend_schema(responses={200: AddressSerializer(many=True)})
     def get(self, request):
         addresses = request.user.customer.addresses.all()
         return Response(AddressSerializer(addresses, many=True).data)
 
+    @extend_schema(request=AddressSerializer, responses={201: AddressSerializer})
     def post(self, request):
         serializer = AddressSerializer(data=request.data)
         if not serializer.is_valid():
@@ -135,6 +167,10 @@ class AddressListCreateView(APIView):
 class PasswordResetRequestView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        request=inline_serializer(name="PasswordResetRequest", fields={"email": f.EmailField()}),
+        responses={200: _DetailSerializer},
+    )
     def post(self, request):
         email = request.data.get("email", "")
         if not email:
@@ -153,6 +189,17 @@ class PasswordResetRequestView(APIView):
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        request=inline_serializer(
+            name="PasswordResetConfirmRequest",
+            fields={
+                "uid": f.CharField(),
+                "token": f.CharField(),
+                "new_password": f.CharField(),
+            },
+        ),
+        responses={200: _DetailSerializer},
+    )
     def post(self, request):
         uidb64 = request.data.get("uid")
         token = request.data.get("token")

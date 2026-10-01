@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -11,6 +12,7 @@ from .serializers import OrderSerializer, CreateOrderSerializer
 class CreateOrderView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(request=CreateOrderSerializer, responses={201: OrderSerializer})
     def post(self, request):
         serializer = CreateOrderSerializer(data=request.data)
         if not serializer.is_valid():
@@ -53,6 +55,7 @@ class CreateOrderView(APIView):
 class OrderDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses={200: OrderSerializer})
     def get(self, request, order_id):
         try:
             order = OrderModel.objects.prefetch_related("lines").get(
@@ -67,6 +70,7 @@ class OrderDetailView(APIView):
 class CustomerOrderListView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses={200: OrderSerializer(many=True)})
     def get(self, request):
         orders = (
             OrderModel.objects

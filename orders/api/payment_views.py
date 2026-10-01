@@ -1,9 +1,10 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import fields as f, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework import status
 from ..services.payment_service import PaymentService
 from notifications.tasks import send_payment_confirmation
 
@@ -11,6 +12,10 @@ from notifications.tasks import send_payment_confirmation
 class CreateCheckoutSessionView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        request=inline_serializer(name="CheckoutSessionRequest", fields={"return_url": f.CharField(required=False)}),
+        responses={200: inline_serializer(name="CheckoutSessionResponse", fields={"client_secret": f.CharField()})},
+    )
     def post(self, request, order_id):
         return_url = request.data.get(
             "return_url",
@@ -34,6 +39,7 @@ class StripeWebhookView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(exclude=True)
     def post(self, request):
         sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
         service = PaymentService()

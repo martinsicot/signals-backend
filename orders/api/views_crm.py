@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import fields as f, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from ..models import OrderModel
 from .serializers import OrderSerializer
 from accounts.permissions import IsCRMOrOps, IsCRM
@@ -22,6 +23,7 @@ class CRMOrderListView(APIView):
 
     permission_classes = [IsCRMOrOps]
 
+    @extend_schema(responses={200: OrderSerializer(many=True)})
     def get(self, request):
         qs = OrderModel.objects.prefetch_related("lines").select_related("customer__user")
 
@@ -40,6 +42,7 @@ class CRMOrderDetailView(APIView):
 
     permission_classes = [IsCRMOrOps]
 
+    @extend_schema(responses={200: OrderSerializer})
     def get(self, request, order_id):
         order = get_object_or_404(
             OrderModel.objects.prefetch_related("lines").select_related("customer__user"),
@@ -56,6 +59,10 @@ class CRMOrderStatusView(APIView):
 
     permission_classes = [IsCRM]
 
+    @extend_schema(
+        request=inline_serializer(name="OrderStatusUpdate", fields={"status": f.CharField()}),
+        responses={200: OrderSerializer},
+    )
     def patch(self, request, order_id):
         order = get_object_or_404(OrderModel, pk=order_id)
         new_status = request.data.get("status")
