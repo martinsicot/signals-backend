@@ -6,7 +6,7 @@ from rest_framework import status
 from ..services.order_service import OrderService
 from ..domain.exceptions import EmptyOrderError, OrderTooLargeError, ProductNotAvailableError
 from ..models import OrderModel
-from .serializers import OrderSerializer, CreateOrderSerializer
+from .serializers import OrderSerializer, CreateOrderSerializer, OrderStatusSerializer
 
 
 class CreateOrderView(APIView):
@@ -79,3 +79,24 @@ class CustomerOrderListView(APIView):
             .order_by("-created_at")
         )
         return Response(OrderSerializer(orders, many=True).data)
+
+
+class OrderStatusView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(responses={200: OrderStatusSerializer})
+    def get(self, request, order_id):
+        try:
+            order = OrderModel.objects.prefetch_related("lines").get(id=order_id)
+        except OrderModel.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.user.is_authenticated:
+            if not hasattr(request.user, "customer") or order.customer_id != request.user.customer.id:
+                return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            email = request.query_params.get("email", "").strip().lower()
+            if not email or order.guest_email.lower() != email:
+                return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
+
+        return Response(OrderStatusSerializer(order).data)
