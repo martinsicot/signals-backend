@@ -100,3 +100,15 @@ class OrderStatusView(APIView):
                 return Response({"detail": "Forbidden."}, status=status.HTTP_403_FORBIDDEN)
 
         return Response(OrderStatusSerializer(order).data)
+
+
+class OrderBySessionView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(responses={200: OrderStatusSerializer})
+    def get(self, request, session_id):
+        try:
+            order = OrderModel.objects.prefetch_related("lines").get(stripe_session_id=session_id)
+        except OrderModel.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(OrderStatusSerializer(order).data)
