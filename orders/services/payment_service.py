@@ -65,14 +65,14 @@ class PaymentService:
             order_id = 0
 
         if not order_id:
-            return None
+            return None, 0
 
         if event_type == "checkout.session.completed":
-            self.order_repo.update_status(order_id, OrderStatus.PAID)
-            return event_type
+            updated = self.order_repo.update_status(order_id, OrderStatus.PAID, only_if_not=OrderStatus.PAID)
+            return event_type, order_id if updated else 0
 
         if event_type in ("checkout.session.expired", "payment_intent.payment_failed"):
             self.order_repo.update_status(order_id, OrderStatus.CANCELLED)
-            return event_type
+            return event_type, order_id
 
-        return None
+        return None, 0

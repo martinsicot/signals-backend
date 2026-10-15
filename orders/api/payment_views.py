@@ -70,25 +70,21 @@ class StripeWebhookView(APIView):
         service = PaymentService()
 
         try:
-            event_type = service.handle_webhook(
+            event_type, order_id = service.handle_webhook(
                 payload=request.body,
                 sig_header=sig_header,
             )
         except ValueError:
             return Response({"error": "Invalid signature."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if event_type == "checkout.session.completed":
-            from ..models import OrderModel
+        if event_type == "checkout.session.completed" and order_id:
             import json
-            body = json.loads(request.body)
-            session_obj = body["data"]["object"]
-            order_id = int(session_obj.get("metadata", {}).get("order_id", 0))
-            if order_id:
-                shipping = session_obj.get("shipping_details") or {}
-                if shipping:
-                    OrderModel.objects.filter(id=order_id).update(
-                        shipping_address_snapshot=shipping
-                    )
-                send_payment_confirmation.delay(order_id)
+            session_obj = json.loads(request.body)["data"]["object"]
+            shipping = session_obj.get("shipping_details") or {}
+            if shipping:
+                OrderModel.objects.filter(id=order_id).update(
+                    shipping_address_snapshot=shipping
+                )
+            send_payment_confirmation.delay(order_id)
 
         return Response({"status": "ok"})
