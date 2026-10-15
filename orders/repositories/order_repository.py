@@ -49,6 +49,9 @@ class OrderRepository:
     def update_stripe_session(self, order_id: int, session_id: str) -> None:
         OrderModel.objects.filter(id=order_id).update(stripe_session_id=session_id)
 
+    def update_shipping_snapshot(self, order_id: int, shipping: dict) -> None:
+        OrderModel.objects.filter(id=order_id).update(shipping_address_snapshot=shipping)
+
     def get_by_stripe_session(self, session_id: str) -> Order:
         model = OrderModel.objects.prefetch_related("lines").get(stripe_session_id=session_id)
         return self._to_entity(model)

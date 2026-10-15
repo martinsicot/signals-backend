@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from ..models import OrderModel
 from ..services.payment_service import PaymentService
-from notifications.tasks import send_payment_confirmation
 
 
 class CreateCheckoutSessionView(APIView):
@@ -70,21 +69,8 @@ class StripeWebhookView(APIView):
         service = PaymentService()
 
         try:
-            event_type, order_id = service.handle_webhook(
-                payload=request.body,
-                sig_header=sig_header,
-            )
+            service.process_webhook(payload=request.body, sig_header=sig_header)
         except ValueError:
             return Response({"error": "Invalid signature."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if event_type == "checkout.session.completed" and order_id:
-            import json
-            session_obj = json.loads(request.body)["data"]["object"]
-            shipping = session_obj.get("shipping_details") or {}
-            if shipping:
-                OrderModel.objects.filter(id=order_id).update(
-                    shipping_address_snapshot=shipping
-                )
-            send_payment_confirmation.delay(order_id)
 
         return Response({"status": "ok"})
