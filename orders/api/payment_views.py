@@ -62,6 +62,7 @@ class CreateCheckoutSessionView(APIView):
 class StripeWebhookView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    parser_classes = []
 
     @extend_schema(exclude=True)
     def post(self, request):

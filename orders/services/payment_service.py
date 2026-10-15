@@ -59,7 +59,10 @@ class PaymentService:
 
         event_type = event["type"]
         obj = event["data"]["object"]
-        order_id = int(obj.get("metadata", {}).get("order_id", 0))
+        try:
+            order_id = int(obj.metadata["order_id"])
+        except (AttributeError, KeyError, TypeError, ValueError):
+            order_id = 0
 
         if not order_id:
             return None
