@@ -40,11 +40,17 @@ class OrderRepository:
         )
         return [self._to_entity(m) for m in qs]
 
-    def update_status(self, order_id: int, status: OrderStatus) -> None:
-        OrderModel.objects.filter(id=order_id).update(status=status.value)
+    def update_status(self, order_id: int, status: OrderStatus, only_if_not: OrderStatus | None = None) -> int:
+        qs = OrderModel.objects.filter(id=order_id)
+        if only_if_not is not None:
+            qs = qs.exclude(status=only_if_not.value)
+        return qs.update(status=status.value)
 
     def update_stripe_session(self, order_id: int, session_id: str) -> None:
         OrderModel.objects.filter(id=order_id).update(stripe_session_id=session_id)
+
+    def update_shipping_snapshot(self, order_id: int, shipping: dict) -> None:
+        OrderModel.objects.filter(id=order_id).update(shipping_address_snapshot=shipping)
 
     def get_by_stripe_session(self, session_id: str) -> Order:
         model = OrderModel.objects.prefetch_related("lines").get(stripe_session_id=session_id)

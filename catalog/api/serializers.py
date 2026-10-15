@@ -1,5 +1,13 @@
+from decimal import Decimal
+from django.conf import settings
 from rest_framework import serializers
 from ..models import Category, Product, ProductVariant, AttributeValue
+
+
+def _price_ttc(price):
+    if price is None:
+        return None
+    return str(round(price * (Decimal("1") + settings.VAT_RATE), 2))
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -19,10 +27,15 @@ class AttributeValueSerializer(serializers.ModelSerializer):
 
 class ProductVariantSerializer(serializers.ModelSerializer):
     attributes = AttributeValueSerializer(many=True, read_only=True)
+    price_ttc = serializers.SerializerMethodField()
+    delai = serializers.CharField(source="price_cell.delai", read_only=True, default=None)
 
     class Meta:
         model = ProductVariant
-        fields = ["id", "sku", "price", "weight_kg", "is_active", "attributes"]
+        fields = ["id", "sku", "price", "price_ttc", "weight_kg", "is_active", "attributes", "delai"]
+
+    def get_price_ttc(self, obj):
+        return _price_ttc(obj.price)
 
 
 def _absolute(request, url):
@@ -82,7 +95,12 @@ class ProductVariantDetailSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
     product_slug = serializers.CharField(source="product.slug", read_only=True)
     attributes = AttributeValueSerializer(many=True, read_only=True)
+    price_ttc = serializers.SerializerMethodField()
+    delai = serializers.CharField(source="price_cell.delai", read_only=True, default=None)
 
     class Meta:
         model = ProductVariant
-        fields = ["id", "sku", "price", "weight_kg", "is_active", "product_name", "product_slug", "attributes"]
+        fields = ["id", "sku", "price", "price_ttc", "weight_kg", "is_active", "product_name", "product_slug", "attributes", "delai"]
+
+    def get_price_ttc(self, obj):
+        return _price_ttc(obj.price)

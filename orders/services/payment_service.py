@@ -1,3 +1,4 @@
+import json
 import stripe
 from django.conf import settings
 from ..repositories.order_repository import OrderRepository
@@ -48,8 +49,8 @@ class PaymentService:
         self.order_repo.update_stripe_session(order_id, session.id)
         return session.client_secret
 
-    def handle_webhook(self, payload: bytes, sig_header: str) -> str | None:
-        """Process a Stripe webhook event. Returns the event type handled."""
+    def process_webhook(self, payload: bytes, sig_header: str) -> None:
+        """Verify, route and fully handle a Stripe webhook event."""
         try:
             event = stripe.Webhook.construct_event(
                 payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
@@ -59,17 +60,28 @@ class PaymentService:
 
         event_type = event["type"]
         obj = event["data"]["object"]
-        order_id = int(obj.get("metadata", {}).get("order_id", 0))
-
-        if not order_id:
-            return None
+        try:
+            order_id = int(obj.metadata["order_id"])
+        except (AttributeError, KeyError, TypeError, ValueError):
+            return
 
         if event_type == "checkout.session.completed":
-            self.order_repo.update_status(order_id, OrderStatus.PAID)
-            return event_type
-
-        if event_type in ("checkout.session.expired", "payment_intent.payment_failed"):
+            self._handle_checkout_completed(order_id, payload)
+        elif event_type in ("checkout.session.expired", "payment_intent.payment_failed"):
             self.order_repo.update_status(order_id, OrderStatus.CANCELLED)
-            return event_type
 
-        return None
+    def _handle_checkout_completed(self, order_id: int, payload: bytes) -> None:
+        from notifications.tasks import send_payment_confirmation
+
+        updated = self.order_repo.update_status(
+            order_id, OrderStatus.PAID, only_if_not=OrderStatus.PAID
+        )
+        if not updated:
+            return
+
+        session_obj = json.loads(payload)["data"]["object"]
+        shipping = session_obj.get("shipping_details") or {}
+        if shipping:
+            self.order_repo.update_shipping_snapshot(order_id, shipping)
+
+        send_payment_confirmation.delay(order_id)
