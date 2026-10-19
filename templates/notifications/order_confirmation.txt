@@ -12,4 +12,4 @@ Adresse de livraison :
 {{ order.shipping_address_snapshot.code_postal }} {{ order.shipping_address_snapshot.ville }}
 
 Merci pour votre commande.
-L'équipe Strada
+L'équipe Le Panneau

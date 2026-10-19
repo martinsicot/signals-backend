@@ -4,4 +4,4 @@ Votre commande #{{ order.id }} a bien été livrée.
 
 Nous espérons que tout vous convient. N'hésitez pas à nous contacter si vous avez la moindre question.
 
-L'équipe Strada
+L'équipe Le Panneau
