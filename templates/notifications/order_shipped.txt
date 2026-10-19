@@ -1,0 +1,12 @@
+Bonjour,
+
+Votre commande #{{ order.id }} a été expédiée.
+{% if tracking_number %}
+Numéro de suivi : {{ tracking_number }}
+{% endif %}
+Adresse de livraison :
+{{ order.shipping_address_snapshot.nom }}
+{{ order.shipping_address_snapshot.adresse }}
+{{ order.shipping_address_snapshot.code_postal }} {{ order.shipping_address_snapshot.ville }}
+
+L'équipe Strada

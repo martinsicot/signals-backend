@@ -3,9 +3,13 @@ from django.template.loader import render_to_string
 from django.conf import settings
 
 
-def send_order_confirmation(order_id: int) -> None:
+def _load_order(order_id: int):
     from orders.models import OrderModel
-    order = OrderModel.objects.prefetch_related("lines").get(id=order_id)
+    return OrderModel.objects.prefetch_related("lines").get(id=order_id)
+
+
+def send_order_confirmation(order_id: int) -> None:
+    order = _load_order(order_id)
     recipient = order.contact_email
 
     subject = f"Order #{order.id} confirmed — Signals"
@@ -14,11 +18,10 @@ def send_order_confirmation(order_id: int) -> None:
 
 
 def send_payment_confirmation(order_id: int) -> None:
-    from orders.models import OrderModel
     from django.core.mail import EmailMessage
     from .pdf import generate_invoice_pdf
 
-    order = OrderModel.objects.prefetch_related("lines").get(id=order_id)
+    order = _load_order(order_id)
     recipient = order.contact_email
 
     subject = f"Payment received for order #{order.id} — Signals"
@@ -37,3 +40,27 @@ def send_payment_confirmation(order_id: int) -> None:
         settings.DEFAULT_FROM_EMAIL,
         [settings.DEFAULT_FROM_EMAIL],
     )
+
+
+def send_order_in_production(order_id: int) -> None:
+    order = _load_order(order_id)
+    subject = f"Commande #{order.id} en cours de fabrication — Strada"
+    body = render_to_string("notifications/order_in_production.txt", {"order": order})
+    send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [order.contact_email])
+
+
+def send_order_shipped(order_id: int, tracking_number: str | None = None) -> None:
+    order = _load_order(order_id)
+    subject = f"Commande #{order.id} expédiée — Strada"
+    body = render_to_string(
+        "notifications/order_shipped.txt",
+        {"order": order, "tracking_number": tracking_number},
+    )
+    send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [order.contact_email])
+
+
+def send_order_delivered(order_id: int) -> None:
+    order = _load_order(order_id)
+    subject = f"Commande #{order.id} livrée — Strada"
+    body = render_to_string("notifications/order_delivered.txt", {"order": order})
+    send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [order.contact_email])
