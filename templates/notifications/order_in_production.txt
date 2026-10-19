@@ -13,4 +13,4 @@ Adresse de livraison :
 {{ order.shipping_address_snapshot.adresse }}
 {{ order.shipping_address_snapshot.code_postal }} {{ order.shipping_address_snapshot.ville }}
 
-L'équipe Strada
+L'équipe Le Panneau

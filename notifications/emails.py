@@ -12,7 +12,7 @@ def send_order_confirmation(order_id: int) -> None:
     order = _load_order(order_id)
     recipient = order.contact_email
 
-    subject = f"Order #{order.id} confirmed — Signals"
+    subject = f"Commande #{order.id} confirmée — Le Panneau"
     body = render_to_string("notifications/order_confirmation.txt", {"order": order})
     send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [recipient])
 
@@ -24,7 +24,7 @@ def send_payment_confirmation(order_id: int) -> None:
     order = _load_order(order_id)
     recipient = order.contact_email
 
-    subject = f"Payment received for order #{order.id} — Signals"
+    subject = f"Paiement reçu pour la commande #{order.id} — Le Panneau"
     body = render_to_string("notifications/payment_confirmation.txt", {"order": order})
 
     pdf_bytes = generate_invoice_pdf(order)
@@ -35,7 +35,7 @@ def send_payment_confirmation(order_id: int) -> None:
     # Notify admin / associate
     admin_body = render_to_string("notifications/new_order_admin.txt", {"order": order})
     send_mail(
-        f"[NEW ORDER] #{order.id} — {order.contact_email}",
+        f"[NOUVELLE COMMANDE] #{order.id} — {order.contact_email}",
         admin_body,
         settings.DEFAULT_FROM_EMAIL,
         [settings.DEFAULT_FROM_EMAIL],
@@ -44,14 +44,14 @@ def send_payment_confirmation(order_id: int) -> None:
 
 def send_order_in_production(order_id: int) -> None:
     order = _load_order(order_id)
-    subject = f"Commande #{order.id} en cours de fabrication — Strada"
+    subject = f"Commande #{order.id} en cours de fabrication — Le Panneau"
     body = render_to_string("notifications/order_in_production.txt", {"order": order})
     send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [order.contact_email])
 
 
 def send_order_shipped(order_id: int, tracking_number: str | None = None) -> None:
     order = _load_order(order_id)
-    subject = f"Commande #{order.id} expédiée — Strada"
+    subject = f"Commande #{order.id} expédiée — Le Panneau"
     body = render_to_string(
         "notifications/order_shipped.txt",
         {"order": order, "tracking_number": tracking_number},
@@ -61,6 +61,6 @@ def send_order_shipped(order_id: int, tracking_number: str | None = None) -> Non
 
 def send_order_delivered(order_id: int) -> None:
     order = _load_order(order_id)
-    subject = f"Commande #{order.id} livrée — Strada"
+    subject = f"Commande #{order.id} livrée — Le Panneau"
     body = render_to_string("notifications/order_delivered.txt", {"order": order})
     send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [order.contact_email])
