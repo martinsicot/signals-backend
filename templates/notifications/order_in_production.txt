@@ -1,0 +1,17 @@
+Bonjour,
+
+Votre commande #{{ order.id }} est maintenant en cours de fabrication.
+
+Délai estimé : 3 jours ouvrés.
+Vous recevrez un email dès l'expédition avec les informations de suivi.
+
+RÉCAPITULATIF
+{% for line in order.lines.all %}— {{ line.product_name_snapshot }} x{{ line.quantity }}
+{% endfor %}
+Adresse de livraison :
+{{ order.shipping_address_snapshot.first_name }} {{ order.shipping_address_snapshot.last_name }}
+{{ order.shipping_address_snapshot.line1 }}{% if order.shipping_address_snapshot.line2 %}
+{{ order.shipping_address_snapshot.line2 }}{% endif %}
+{{ order.shipping_address_snapshot.postal_code }} {{ order.shipping_address_snapshot.city }}
+
+L'équipe Strada

@@ -6,6 +6,11 @@ from rest_framework.response import Response
 from ..models import OrderModel
 from .serializers import OrderSerializer
 from accounts.permissions import IsCRMOrOps, IsCRM
+from notifications.tasks import (
+    send_order_in_production,
+    send_order_shipped,
+    send_order_delivered,
+)
 
 
 ALLOWED_STATUS_TRANSITIONS = {
@@ -60,7 +65,13 @@ class CRMOrderStatusView(APIView):
     permission_classes = [IsCRM]
 
     @extend_schema(
-        request=inline_serializer(name="OrderStatusUpdate", fields={"status": f.CharField()}),
+        request=inline_serializer(
+            name="OrderStatusUpdate",
+            fields={
+                "status": f.CharField(),
+                "tracking_number": f.CharField(required=False),
+            },
+        ),
         responses={200: OrderSerializer},
     )
     def patch(self, request, order_id):
@@ -82,4 +93,13 @@ class CRMOrderStatusView(APIView):
 
         order.status = new_status
         order.save(update_fields=["status", "updated_at"])
+
+        if new_status == OrderModel.Status.IN_PRODUCTION:
+            send_order_in_production.delay(order.id)
+        elif new_status == OrderModel.Status.SHIPPED:
+            tracking = request.data.get("tracking_number") or None
+            send_order_shipped.delay(order.id, tracking)
+        elif new_status == OrderModel.Status.DELIVERED:
+            send_order_delivered.delay(order.id)
+
         return Response(OrderSerializer(order).data)
