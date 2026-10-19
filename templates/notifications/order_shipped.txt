@@ -5,9 +5,8 @@ Votre commande #{{ order.id }} a été expédiée.
 Numéro de suivi : {{ tracking_number }}
 {% endif %}
 Adresse de livraison :
-{{ order.shipping_address_snapshot.first_name }} {{ order.shipping_address_snapshot.last_name }}
-{{ order.shipping_address_snapshot.line1 }}{% if order.shipping_address_snapshot.line2 %}
-{{ order.shipping_address_snapshot.line2 }}{% endif %}
-{{ order.shipping_address_snapshot.postal_code }} {{ order.shipping_address_snapshot.city }}
+{{ order.shipping_address_snapshot.nom }}
+{{ order.shipping_address_snapshot.adresse }}
+{{ order.shipping_address_snapshot.code_postal }} {{ order.shipping_address_snapshot.ville }}
 
 L'équipe Strada
