@@ -11,17 +11,17 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from orders.models import OrderModel
-from tests.factories import CustomerFactory, OrderFactory, OrderLineFactory
+from tests.factories import CustomerFactory, GuestOrderFactory, OrderFactory, OrderLineFactory
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _make_stripe_session(url="https://checkout.stripe.com/pay/test_session"):
+def _make_stripe_session(client_secret="pi_test_secret_abc123"):
     session = MagicMock()
     session.id = "cs_test_123"
-    session.url = url
+    session.client_secret = client_secret
     return session
 
 
@@ -36,6 +36,13 @@ def _webhook_payload(event_type: str, order_id: int) -> bytes:
     }).encode()
 
 
+def _make_webhook_event(event_type: str, order_id: int) -> dict:
+    """Return a mock event dict where data.object uses attribute-style access (like Stripe objects)."""
+    obj = MagicMock()
+    obj.metadata = {"order_id": str(order_id)}
+    return {"type": event_type, "data": {"object": obj}}
+
+
 # ---------------------------------------------------------------------------
 # POST /api/orders/{id}/checkout/
 # ---------------------------------------------------------------------------
@@ -45,7 +52,7 @@ class TestCreateCheckoutSessionView:
     def _url(self, order_id):
         return f"/api/orders/{order_id}/checkout/"
 
-    def test_returns_checkout_url_for_order_owner(self, client, customer):
+    def test_returns_client_secret_for_order_owner(self, client, customer):
         order = OrderFactory(customer=customer)
         OrderLineFactory(order=order)
         client.force_login(customer.user)
@@ -56,7 +63,7 @@ class TestCreateCheckoutSessionView:
             response = client.post(self._url(order.pk), content_type="application/json")
 
         assert response.status_code == 200
-        assert response.json()["checkout_url"] == "https://checkout.stripe.com/pay/test_session"
+        assert response.json()["client_secret"] == "pi_test_secret_abc123"
 
     def test_stripe_session_includes_order_metadata(self, client, customer):
         order = OrderFactory(customer=customer)
@@ -84,7 +91,7 @@ class TestCreateCheckoutSessionView:
         assert len(line_items) >= 1
         assert any(item["quantity"] == 2 for item in line_items)
 
-    def test_custom_success_and_cancel_urls_are_forwarded(self, client, customer):
+    def test_custom_return_url_is_forwarded_to_stripe(self, client, customer):
         order = OrderFactory(customer=customer)
         OrderLineFactory(order=order)
         client.force_login(customer.user)
@@ -92,13 +99,11 @@ class TestCreateCheckoutSessionView:
         with patch("orders.services.payment_service.stripe.checkout.Session.create") as mock_create:
             mock_create.return_value = _make_stripe_session()
             client.post(self._url(order.pk), data={
-                "success_url": "https://mysite.com/success",
-                "cancel_url": "https://mysite.com/cancel",
+                "return_url": "https://mysite.com/checkout/confirmation",
             }, content_type="application/json")
 
         call_kwargs = mock_create.call_args[1]
-        assert call_kwargs["success_url"] == "https://mysite.com/success"
-        assert call_kwargs["cancel_url"] == "https://mysite.com/cancel"
+        assert call_kwargs["return_url"] == "https://mysite.com/checkout/confirmation"
 
     def test_returns_400_when_stripe_raises(self, client, customer):
         order = OrderFactory(customer=customer)
@@ -113,10 +118,40 @@ class TestCreateCheckoutSessionView:
         assert response.status_code == 400
         assert "error" in response.json()
 
-    def test_returns_401_when_unauthenticated(self, client):
-        order = OrderFactory()
+    def test_guest_with_correct_email_can_checkout(self, client):
+        order = GuestOrderFactory()
+        OrderLineFactory(order=order)
+
+        with patch("orders.services.payment_service.stripe.checkout.Session.create") as mock_create:
+            mock_create.return_value = _make_stripe_session()
+            response = client.post(
+                self._url(order.pk),
+                data={"guest_email": order.guest_email},
+                content_type="application/json",
+            )
+
+        assert response.status_code == 200
+        assert "client_secret" in response.json()
+
+    def test_guest_with_wrong_email_gets_403(self, client):
+        order = GuestOrderFactory()
+        response = client.post(
+            self._url(order.pk),
+            data={"guest_email": "intrus@example.com"},
+            content_type="application/json",
+        )
+        assert response.status_code == 403
+
+    def test_guest_with_no_email_gets_403(self, client):
+        order = GuestOrderFactory()
         response = client.post(self._url(order.pk), content_type="application/json")
-        assert response.status_code == 401
+        assert response.status_code == 403
+
+    def test_authenticated_user_cannot_access_another_users_order(self, client, customer):
+        other_order = OrderFactory()
+        client.force_login(customer.user)
+        response = client.post(self._url(other_order.pk), content_type="application/json")
+        assert response.status_code == 403
 
 
 # ---------------------------------------------------------------------------
@@ -142,8 +177,8 @@ class TestStripeWebhookView:
         payload = _webhook_payload("checkout.session.completed", order.pk)
 
         with patch("orders.services.payment_service.stripe.Webhook.construct_event") as mock_event, \
-             patch("orders.api.payment_views.send_payment_confirmation") as mock_task:
-            mock_event.return_value = json.loads(payload)
+             patch("notifications.tasks.send_payment_confirmation") as mock_task:
+            mock_event.return_value = _make_webhook_event("checkout.session.completed", order.pk)
             mock_task.delay = MagicMock()
 
             response = self._post(client, payload)
@@ -157,8 +192,8 @@ class TestStripeWebhookView:
         payload = _webhook_payload("checkout.session.completed", order.pk)
 
         with patch("orders.services.payment_service.stripe.Webhook.construct_event") as mock_event, \
-             patch("orders.api.payment_views.send_payment_confirmation") as mock_task:
-            mock_event.return_value = json.loads(payload)
+             patch("notifications.tasks.send_payment_confirmation") as mock_task:
+            mock_event.return_value = _make_webhook_event("checkout.session.completed", order.pk)
             mock_task.delay = MagicMock()
 
             self._post(client, payload)
@@ -172,8 +207,8 @@ class TestStripeWebhookView:
         payload = _webhook_payload("checkout.session.expired", order.pk)
 
         with patch("orders.services.payment_service.stripe.Webhook.construct_event") as mock_event, \
-             patch("orders.api.payment_views.send_payment_confirmation"):
-            mock_event.return_value = json.loads(payload)
+             patch("notifications.tasks.send_payment_confirmation"):
+            mock_event.return_value = _make_webhook_event("checkout.session.expired", order.pk)
 
             response = self._post(client, payload)
 
@@ -188,8 +223,8 @@ class TestStripeWebhookView:
         payload = _webhook_payload("payment_intent.payment_failed", order.pk)
 
         with patch("orders.services.payment_service.stripe.Webhook.construct_event") as mock_event, \
-             patch("orders.api.payment_views.send_payment_confirmation"):
-            mock_event.return_value = json.loads(payload)
+             patch("notifications.tasks.send_payment_confirmation"):
+            mock_event.return_value = _make_webhook_event("payment_intent.payment_failed", order.pk)
 
             response = self._post(client, payload)
 
@@ -204,7 +239,7 @@ class TestStripeWebhookView:
         payload = _webhook_payload("customer.created", order.pk)
 
         with patch("orders.services.payment_service.stripe.Webhook.construct_event") as mock_event, \
-             patch("orders.api.payment_views.send_payment_confirmation"):
+             patch("notifications.tasks.send_payment_confirmation"):
             mock_event.return_value = json.loads(payload)
 
             response = self._post(client, payload)
@@ -234,7 +269,7 @@ class TestStripeWebhookView:
         }).encode()
 
         with patch("orders.services.payment_service.stripe.Webhook.construct_event") as mock_event, \
-             patch("orders.api.payment_views.send_payment_confirmation"):
+             patch("notifications.tasks.send_payment_confirmation"):
             mock_event.return_value = json.loads(payload)
 
             response = self._post(client, payload)

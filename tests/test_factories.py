@@ -69,14 +69,15 @@ class TestCatalogFactories:
         assert category.slug.startswith("category-")
 
     def test_product_links_to_category(self):
-        product = ProductFactory()
-        assert product.category.pk is not None
+        category = CategoryFactory()
+        product = ProductFactory(categories=[category])
+        assert product.categories.filter(pk=category.pk).exists()
         assert product.is_active is True
 
     def test_product_with_explicit_category(self):
         category = CategoryFactory()
-        product = ProductFactory(category=category)
-        assert product.category == category
+        product = ProductFactory(categories=[category])
+        assert product.categories.filter(pk=category.pk).exists()
 
 
 @pytest.mark.django_db
@@ -102,7 +103,7 @@ class TestOrderFactories:
         line = OrderLineFactory()
         assert line.order.pk is not None
         assert line.product.pk is not None
-        assert line.product_name_snapshot == line.product.name
+        assert line.product_name_snapshot == line.product.product.name
         assert line.total == line.unit_price * line.quantity
 
     def test_multiple_lines_on_same_order(self):

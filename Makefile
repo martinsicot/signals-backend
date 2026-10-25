@@ -2,7 +2,7 @@
 
 COMPOSE = docker compose
 
-.PHONY: help up down restart logs shell migrate makemigrations build import-catalog seed thumbnails link-images
+.PHONY: help up down restart logs shell migrate makemigrations build import-catalog seed thumbnails link-images test nuke
 
 help:
 	@echo "Usage: make <target>"
@@ -17,8 +17,8 @@ help:
 	@echo "  build         Rebuild l'image Docker"
 	@echo "  import-catalog Importer le catalogue depuis la grille de prix (--clear)"
 	@echo "  seed          Alias de import-catalog"
-	@echo "  thumbnails    Générer les vignettes WebP des images produits
-  link-images   Lier les PNG media aux produits en base (à lancer après import-catalog)"
+	@echo "  thumbnails    Générer les vignettes WebP des images produits"
+	@echo "  link-images   Lier les PNG media aux produits en base (à lancer après import-catalog)"
 
 up:
 	$(COMPOSE) up --build -d
@@ -57,3 +57,19 @@ thumbnails:
 
 link-images:
 	$(COMPOSE) exec web uv run python manage.py link_product_images
+
+test:
+	PYTHONMALLOC=malloc uv run pytest
+
+nuke:
+	@echo ">> Arret et suppression des containers + volumes..."
+	$(COMPOSE) down -v --remove-orphans
+	docker volume rm backend-signals_venv_data 2>/dev/null || true
+	@echo ">> Suppression de l'image Docker..."
+	docker rmi backend-signals-web 2>/dev/null || true
+	@echo ">> Nettoyage du cache Docker (build cache)..."
+	docker builder prune -f
+	@echo ">> Rebuild sans lancer ni migrer..."
+	$(COMPOSE) build --no-cache
+	@echo ""
+	@echo "Pret -- lance 'make up' pour demarrer avec les migrations"

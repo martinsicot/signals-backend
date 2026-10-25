@@ -15,13 +15,14 @@ def mock_variant():
 
 @pytest.fixture
 def order_service(mock_variant):
-    service = OrderService.__new__(OrderService)
-    service.order_repo = MagicMock()
-    service.product_repo = MagicMock()
-    service.product_repo.get_variant_by_id.return_value = mock_variant
-    service.product_repo.get_variant_price.return_value = Decimal("50.00")
-    service.order_repo.save.return_value = MagicMock(id=1)
-    return service
+    with patch("notifications.tasks.send_order_confirmation"):
+        service = OrderService.__new__(OrderService)
+        service.order_repo = MagicMock()
+        service.product_repo = MagicMock()
+        service.product_repo.get_variant_by_id.return_value = mock_variant
+        service.product_repo.get_variant_price.return_value = Decimal("50.00")
+        service.order_repo.save.return_value = MagicMock(id=1)
+        yield service
 
 
 class TestCreateOrder:

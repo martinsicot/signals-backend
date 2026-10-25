@@ -58,9 +58,9 @@ def test_category(db):
 @pytest.fixture
 def test_product(db, test_category):
     return ProductFactory(
-        category=test_category,
         name="Stop Sign",
         slug="stop-sign",
+        categories=[test_category],
     )
 
 

@@ -325,7 +325,7 @@ class TestProductDetailView:
         # Assert
         assert response.status_code == 200
         assert response.json()["name"] == "Stop Sign"
-        assert "category" in response.json()
+        assert "categories" in response.json()
 
     def test_api_returns_404_for_unknown_slug(self, client):
         # Act

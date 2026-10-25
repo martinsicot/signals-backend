@@ -118,12 +118,24 @@ class ProductFactory(DjangoModelFactory):
         model = Product
         django_get_or_create = ("slug",)
 
-    category = factory.SubFactory(CategoryFactory)
     base_code = factory.Sequence(lambda n: f"TEST-{n}")
     name = factory.Sequence(lambda n: f"Product {n}")
     slug = factory.Sequence(lambda n: f"product-{n}")
     type = "Panneau"
     is_active = True
+
+    @factory.post_generation
+    def categories(self, create, extracted, **kwargs):
+        if not create or not extracted:
+            return
+        for cat in extracted:
+            self.categories.add(cat)
+
+    @factory.post_generation
+    def category(self, create, extracted, **kwargs):
+        if not create or not extracted:
+            return
+        self.categories.add(extracted)
 
 
 class AttributeFactory(DjangoModelFactory):

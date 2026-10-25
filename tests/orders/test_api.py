@@ -1,3 +1,4 @@
+from datetime import datetime, timezone as tz
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
@@ -18,7 +19,7 @@ def make_mock_order_model():
     order.status = "pending"
     order.shipping_fee = Decimal("9.90")
     order.shipping_address_snapshot = {"city": "Paris"}
-    order.created_at.isoformat.return_value = "2025-01-01T00:00:00"
+    order.created_at = datetime(2025, 1, 1, tzinfo=tz.utc)
     line = MagicMock()
     line.id = 1
     line.product_id = 1  # OrderLineModel FK column to ProductVariant
