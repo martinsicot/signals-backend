@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 import stripe
 from django.conf import settings
 from ..repositories.order_repository import OrderRepository
@@ -19,7 +20,7 @@ class PaymentService:
                 "price_data": {
                     "currency": "eur",
                     "product_data": {"name": line.product_name},
-                    "unit_amount": int(line.unit_price * 100),
+                    "unit_amount": int(line.unit_price * (Decimal("1") + settings.VAT_RATE) * 100),
                 },
                 "quantity": line.quantity,
             }
@@ -31,7 +32,7 @@ class PaymentService:
                 "price_data": {
                     "currency": "eur",
                     "product_data": {"name": "Frais de livraison"},
-                    "unit_amount": int(order.shipping_fee * 100),
+                    "unit_amount": int(order.shipping_fee * (Decimal("1") + settings.VAT_RATE) * 100),
                 },
                 "quantity": 1,
             })

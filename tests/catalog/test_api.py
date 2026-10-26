@@ -344,7 +344,7 @@ class TestProductDetailView:
         assert len(data["variants"]) == 1
         variant = data["variants"][0]
         assert variant["sku"] == "STOP-700-CL2"
-        assert variant["price"] == "49.90"
+        assert variant["price_ht"] == "49.90"
         attrs = {a["attribute_slug"]: a for a in variant["attributes"]}
         assert set(attrs) == {"taille", "classe"}
         assert attrs["taille"]["display"] == "700 mm"

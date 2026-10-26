@@ -27,12 +27,13 @@ class AttributeValueSerializer(serializers.ModelSerializer):
 
 class ProductVariantSerializer(serializers.ModelSerializer):
     attributes = AttributeValueSerializer(many=True, read_only=True)
+    price_ht = serializers.DecimalField(source="price", max_digits=10, decimal_places=2, read_only=True)
     price_ttc = serializers.SerializerMethodField()
     delai = serializers.CharField(source="price_cell.delai", read_only=True, default=None)
 
     class Meta:
         model = ProductVariant
-        fields = ["id", "sku", "price", "price_ttc", "weight_kg", "is_active", "attributes", "delai"]
+        fields = ["id", "sku", "price_ht", "price_ttc", "weight_kg", "is_active", "attributes", "delai"]
 
     def get_price_ttc(self, obj):
         return _price_ttc(obj.price)
@@ -95,12 +96,13 @@ class ProductVariantDetailSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
     product_slug = serializers.CharField(source="product.slug", read_only=True)
     attributes = AttributeValueSerializer(many=True, read_only=True)
+    price_ht = serializers.DecimalField(source="price", max_digits=10, decimal_places=2, read_only=True)
     price_ttc = serializers.SerializerMethodField()
     delai = serializers.CharField(source="price_cell.delai", read_only=True, default=None)
 
     class Meta:
         model = ProductVariant
-        fields = ["id", "sku", "price", "price_ttc", "weight_kg", "is_active", "product_name", "product_slug", "attributes", "delai"]
+        fields = ["id", "sku", "price_ht", "price_ttc", "weight_kg", "is_active", "product_name", "product_slug", "attributes", "delai"]
 
     def get_price_ttc(self, obj):
         return _price_ttc(obj.price)
