@@ -1,5 +1,8 @@
 # BUG-003 — Délai fabrication absent des sérialiseurs variant
 
+## Statut
+DONE ✅
+
 ## Priorité
 🔴 BLOQUANT (requis pour T5.6 backlog)
 

@@ -1,5 +1,8 @@
 # BUG-002 — Stripe success/cancel URL pointe vers le backend
 
+## Statut
+DONE ✅
+
 ## Priorité
 🔴 BLOQUANT
 

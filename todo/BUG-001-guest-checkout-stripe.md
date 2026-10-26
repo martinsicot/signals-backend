@@ -1,5 +1,8 @@
 # BUG-001 — Guest checkout bloqué par IsAuthenticated
 
+## Statut
+DONE ✅
+
 ## Priorité
 🔴 BLOQUANT
 
