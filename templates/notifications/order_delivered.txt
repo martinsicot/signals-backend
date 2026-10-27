@@ -1,7 +1,12 @@
-Bonjour,
+Bonjour {{ order.shipping_address_snapshot.first_name }},
 
-Votre commande #{{ order.id }} a bien été livrée.
+Votre commande n° {{ order.id }} a bien été livrée.
 
-Nous espérons que tout vous convient. N'hésitez pas à nous contacter si vous avez la moindre question.
+Nous espérons que vos panneaux vous donnent entière satisfaction.
+N'hésitez pas à nous contacter si vous avez la moindre question ou remarque.
 
+contact@le-panneau.fr
+
+À bientôt,
 L'équipe Le Panneau
+https://le-panneau.fr

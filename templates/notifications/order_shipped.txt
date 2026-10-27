@@ -1,12 +1,18 @@
-Bonjour,
+Bonjour {{ order.shipping_address_snapshot.first_name }},
 
-Votre commande #{{ order.id }} a été expédiée.
+Votre commande n° {{ order.id }} a été expédiée !
 {% if tracking_number %}
 Numéro de suivi : {{ tracking_number }}
+Vous pouvez suivre votre colis directement sur le site du transporteur.
 {% endif %}
 Adresse de livraison :
-{{ order.shipping_address_snapshot.nom }}
-{{ order.shipping_address_snapshot.adresse }}
-{{ order.shipping_address_snapshot.code_postal }} {{ order.shipping_address_snapshot.ville }}
+  {{ order.shipping_address_snapshot.first_name }} {{ order.shipping_address_snapshot.last_name }}
+  {% if order.shipping_address_snapshot.company %}{{ order.shipping_address_snapshot.company }}
+  {% endif %}{{ order.shipping_address_snapshot.line1 }}
+  {% if order.shipping_address_snapshot.line2 %}{{ order.shipping_address_snapshot.line2 }}
+  {% endif %}{{ order.shipping_address_snapshot.postal_code }} {{ order.shipping_address_snapshot.city }}
+
+Pour toute question : contact@le-panneau.fr
 
 L'équipe Le Panneau
+https://le-panneau.fr

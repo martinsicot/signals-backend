@@ -131,7 +131,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@signals.fr")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@le-panneau.fr")
 
 # Business rules — configurable via env so they can differ between deployments
 SHIPPING_FREE_THRESHOLD = Decimal(env("SHIPPING_FREE_THRESHOLD", default="200.00"))

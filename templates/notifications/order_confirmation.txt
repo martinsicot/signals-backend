@@ -1,15 +1,22 @@
-Bonjour,
+Bonjour {{ order.shipping_address_snapshot.first_name }},
 
-Votre commande #{{ order.id }} a bien été reçue. Elle sera traitée dès confirmation du paiement.
+Nous avons bien reçu votre commande n° {{ order.id }}.
 
+Elle est en attente de confirmation du paiement. Vous recevrez un email de confirmation dès que le paiement sera enregistré.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 RÉCAPITULATIF
-{% for line in order.lines.all %}— {{ line.product_name_snapshot }} x{{ line.quantity }} — {{ line.unit_price }} €
-{% endfor %}Livraison : {{ order.shipping_fee }} €
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{% for line in lines %}  {{ line.name }}
+  {{ line.quantity }} × {{ line.unit_price_ttc }} € TTC
+{% endfor %}  Frais de livraison : {{ shipping_ttc }} € TTC
+  ─────────────────────────────────────
+  Total TTC : {{ total_ttc }} €
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Adresse de livraison :
-{{ order.shipping_address_snapshot.nom }}
-{{ order.shipping_address_snapshot.adresse }}
-{{ order.shipping_address_snapshot.code_postal }} {{ order.shipping_address_snapshot.ville }}
+Si vous n'êtes pas à l'origine de cette commande, contactez-nous immédiatement :
+contact@le-panneau.fr
 
-Merci pour votre commande.
+À bientôt,
 L'équipe Le Panneau
+https://le-panneau.fr

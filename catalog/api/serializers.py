@@ -49,12 +49,13 @@ def _absolute(request, url):
 class ProductListSerializer(serializers.ModelSerializer):
     categories = serializers.SerializerMethodField()
     min_price = serializers.SerializerMethodField()
+    min_price_ttc = serializers.SerializerMethodField()
     thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = ["id", "name", "slug", "base_code", "type", "categories",
-                  "image", "thumbnail", "min_price", "is_active"]
+                  "image", "thumbnail", "min_price", "min_price_ttc", "is_active"]
 
     def get_categories(self, obj):
         return [{"id": c.id, "name": c.name, "slug": c.slug} for c in obj.categories.all()]
@@ -62,6 +63,10 @@ class ProductListSerializer(serializers.ModelSerializer):
     def get_min_price(self, obj):
         prices = [v.price for v in obj.variants.all() if v.price is not None]
         return str(min(prices)) if prices else None
+
+    def get_min_price_ttc(self, obj):
+        prices = [v.price for v in obj.variants.all() if v.price is not None]
+        return _price_ttc(min(prices)) if prices else None
 
     def get_thumbnail(self, obj):
         """240px WebP thumbnail for catalog grids."""
