@@ -1,15 +1,28 @@
-New paid order to process.
+Nouvelle commande payée à traiter.
 
-Order #{{ order.id }}
-Customer: {{ order.contact_email }}
-Status: {{ order.get_status_display }}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMANDE N° {{ order.id }}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Client       : {{ order.contact_email }}
+Statut       : {{ order.get_status_display }}
+Date         : {{ order.created_at|date:"d/m/Y H:i" }}
 
-LINES
-{% for line in order.lines.all %}— {{ line.product_name_snapshot }} x{{ line.quantity }} ({{ line.unit_price }} € / unit)
+LIGNES
+{% for line in lines %}  — {{ line.name }} × {{ line.quantity }}
+    {{ line.unit_price_ht }} € HT / unité  →  {{ line.total_ht }} € HT
 {% endfor %}
-Shipping fee: {{ order.shipping_fee }} €
+  Livraison         : {{ shipping_ht }} € HT
+  ─────────────────────────────────────
+  Sous-total HT     : {{ subtotal_ht }} €
+  TVA 20 %          : {{ tva_amount }} €
+  Total TTC encaissé : {{ total_ttc }} €
 
-Shipping address:
-{{ order.shipping_address_snapshot }}
+ADRESSE DE LIVRAISON
+  {{ order.shipping_address_snapshot.first_name }} {{ order.shipping_address_snapshot.last_name }}
+  {% if order.shipping_address_snapshot.company %}{{ order.shipping_address_snapshot.company }}
+  {% endif %}{{ order.shipping_address_snapshot.line1 }}
+  {% if order.shipping_address_snapshot.line2 %}{{ order.shipping_address_snapshot.line2 }}
+  {% endif %}{{ order.shipping_address_snapshot.postal_code }} {{ order.shipping_address_snapshot.city }}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Please place the supplier order.
+ACTION REQUISE : passer la commande fournisseur.

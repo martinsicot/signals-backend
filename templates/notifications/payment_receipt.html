@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #111; margin: 0; padding: 0; }
+        .page { padding: 40px; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+        .company-name { font-size: 22px; font-weight: bold; color: #1d4ed8; }
+        .receipt-title { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
+        .label { color: #6b7280; font-size: 11px; }
+        .section { margin-bottom: 24px; }
+        .section-title { font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 8px; background: #f9fafb; font-size: 11px; color: #6b7280; text-transform: uppercase; }
+        td { padding: 8px; border-bottom: 1px solid #f3f4f6; }
+        .text-right { text-align: right; }
+        .total-row td { font-weight: bold; padding-top: 8px; }
+        .subtotal-row td { padding-top: 8px; color: #6b7280; }
+        .footer { margin-top: 40px; font-size: 10px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 12px; }
+        .badge { display: inline-block; background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <div class="header">
+        <div>
+            <div class="company-name">Le Panneau</div>
+            <div class="label">contact@le-panneau.fr — https://le-panneau.fr</div>
+        </div>
+        <div style="text-align: right;">
+            <div class="receipt-title">Preuve de paiement</div>
+            <div class="label">Commande n° {{ order.id }}</div>
+            <div class="label">Date : {{ order.created_at|date:"d/m/Y" }}</div>
+            <div style="margin-top: 6px;"><span class="badge">✓ Paiement reçu le {{ order.updated_at|date:"d/m/Y" }}</span></div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 40px; margin-bottom: 32px;">
+        <div class="section" style="flex: 1;">
+            <div class="section-title">Vendeur</div>
+            <p>Le Panneau<br>contact@le-panneau.fr</p>
+        </div>
+        <div class="section" style="flex: 1;">
+            <div class="section-title">Client</div>
+            <p>
+                {{ order.shipping_address_snapshot.first_name }} {{ order.shipping_address_snapshot.last_name }}<br>
+                {% if order.shipping_address_snapshot.company %}{{ order.shipping_address_snapshot.company }}<br>{% endif %}
+                {{ order.shipping_address_snapshot.line1 }}<br>
+                {% if order.shipping_address_snapshot.line2 %}{{ order.shipping_address_snapshot.line2 }}<br>{% endif %}
+                {{ order.shipping_address_snapshot.postal_code }} {{ order.shipping_address_snapshot.city }}<br>
+                {{ order.contact_email }}
+            </p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Détail de la commande</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th class="text-right">Qté</th>
+                    <th class="text-right">Prix unit. HT</th>
+                    <th class="text-right">Total HT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in lines %}
+                <tr>
+                    <td>{{ line.name }}</td>
+                    <td class="text-right">{{ line.quantity }}</td>
+                    <td class="text-right">{{ line.unit_price_ht }} €</td>
+                    <td class="text-right">{{ line.total_ht }} €</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3" class="text-right label">Frais de livraison</td>
+                    <td class="text-right">{{ shipping_ht }} €</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr class="subtotal-row">
+                    <td colspan="3" class="text-right">Sous-total HT</td>
+                    <td class="text-right">{{ subtotal_ht }} €</td>
+                </tr>
+                <tr class="subtotal-row">
+                    <td colspan="3" class="text-right">TVA {{ vat_rate }} %</td>
+                    <td class="text-right">{{ tva_amount }} €</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="3" class="text-right">Total TTC</td>
+                    <td class="text-right">{{ total_ttc }} €</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>Ce document est une preuve de paiement, pas une facture fiscale. Une facture conforme vous sera transmise ultérieurement.</p>
+        <p>Paiement reçu le {{ order.updated_at|date:"d/m/Y" }} — Merci pour votre commande.</p>
+    </div>
+
+</div>
+</body>
+</html>
