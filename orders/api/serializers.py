@@ -1,7 +1,7 @@
 from decimal import Decimal
 from django.conf import settings
 from rest_framework import serializers
-from ..models import OrderModel, OrderLineModel
+from ..models import OrderModel, OrderLineModel, QuoteRequest
 
 
 def _ttc(amount):
@@ -72,6 +72,26 @@ class OrderStatusSerializer(serializers.ModelSerializer):
     def get_total_ttc(self, obj):
         subtotal = sum(line.total for line in obj.lines.all())
         return str(_ttc(subtotal + obj.shipping_fee))
+
+
+class QuoteRequestListSerializer(serializers.ModelSerializer):
+    items_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = QuoteRequest
+        fields = ["id", "created_at", "status", "items_count"]
+
+    def get_items_count(self, obj):
+        return len(obj.items)
+
+
+class QuoteRequestDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuoteRequest
+        fields = [
+            "id", "created_at", "status", "items", "message",
+            "total_ht", "total_ttc", "valid_until", "notes", "pdf_url",
+        ]
 
 
 class CreateOrderSerializer(serializers.Serializer):

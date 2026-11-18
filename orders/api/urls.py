@@ -9,4 +9,6 @@ urlpatterns = [
     path("orders/by-session/<str:session_id>/status/", views.OrderBySessionView.as_view(), name="order-by-session"),
     path("orders/<int:order_id>/checkout/", payment_views.CreateCheckoutSessionView.as_view(), name="order-checkout"),
     path("webhooks/stripe/", payment_views.StripeWebhookView.as_view(), name="stripe-webhook"),
+    path("account/quotes/", views.CustomerQuoteListView.as_view(), name="quote-list"),
+    path("account/quotes/<int:pk>/", views.CustomerQuoteDetailView.as_view(), name="quote-detail"),
 ]

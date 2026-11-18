@@ -1,12 +1,17 @@
 from drf_spectacular.utils import extend_schema
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
+from accounts.permissions import IsCustomer
 from ..services.order_service import OrderService
 from ..domain.exceptions import EmptyOrderError, OrderTooLargeError, ProductNotAvailableError
-from ..models import OrderModel
-from .serializers import OrderSerializer, CreateOrderSerializer, OrderStatusSerializer
+from ..models import OrderModel, QuoteRequest
+from .serializers import (
+    OrderSerializer, CreateOrderSerializer, OrderStatusSerializer,
+    QuoteRequestListSerializer, QuoteRequestDetailSerializer,
+)
 
 
 class CreateOrderView(APIView):
@@ -112,3 +117,54 @@ class OrderBySessionView(APIView):
         except OrderModel.DoesNotExist:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
         return Response(OrderStatusSerializer(order).data)
+
+
+class CustomerQuoteListView(APIView):
+
+    def get_permissions(self):
+        if self.request.method == "POST":
+            return [AllowAny()]
+        return [IsCustomer()]
+
+    @extend_schema(responses={200: QuoteRequestListSerializer(many=True)})
+    def get(self, request):
+        qs = QuoteRequest.objects.filter(customer=request.user.customer).order_by("-created_at")
+        paginator = PageNumberPagination()
+        paginator.page_size = 20
+        page = paginator.paginate_queryset(qs, request)
+        return paginator.get_paginated_response(QuoteRequestListSerializer(page, many=True).data)
+
+    @extend_schema(responses={201: QuoteRequestDetailSerializer})
+    def post(self, request):
+        if request.user.is_authenticated and hasattr(request.user, "customer"):
+            customer = request.user.customer
+            guest_email = ""
+        else:
+            customer = None
+            guest_email = request.data.get("guest_email", "").strip()
+            if not guest_email:
+                return Response(
+                    {"guest_email": ["Required for guest quote requests."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        quote = QuoteRequest.objects.create(
+            customer=customer,
+            guest_email=guest_email,
+            guest_info=request.data.get("guest_info", {}),
+            items=request.data.get("items", []),
+            message=request.data.get("message", ""),
+        )
+        return Response(QuoteRequestDetailSerializer(quote).data, status=status.HTTP_201_CREATED)
+
+
+class CustomerQuoteDetailView(APIView):
+    permission_classes = [IsCustomer]
+
+    @extend_schema(responses={200: QuoteRequestDetailSerializer})
+    def get(self, request, pk):
+        try:
+            quote = QuoteRequest.objects.get(pk=pk, customer=request.user.customer)
+        except QuoteRequest.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(QuoteRequestDetailSerializer(quote).data)

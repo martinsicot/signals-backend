@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import OrderModel, OrderLineModel
+from .models import OrderModel, OrderLineModel, QuoteRequest
 
 
 class OrderLineInline(admin.TabularInline):
@@ -17,3 +17,10 @@ class OrderAdmin(admin.ModelAdmin):
     readonly_fields = ["stripe_session_id", "shipping_address_snapshot", "created_at", "updated_at"]
     inlines = [OrderLineInline]
     list_select_related = ["customer__user"]
+
+
+@admin.register(QuoteRequest)
+class QuoteRequestAdmin(admin.ModelAdmin):
+    list_display = ["id", "customer", "guest_email", "status", "created_at"]
+    list_filter = ["status"]
+    readonly_fields = ["created_at"]

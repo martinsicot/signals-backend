@@ -1,6 +1,7 @@
 from pathlib import Path
 from decimal import Decimal
 from datetime import timedelta
+import os
 import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -10,6 +11,11 @@ env = environ.Env()
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[])
+
+# Render expose automatiquement RENDER_EXTERNAL_HOSTNAME
+_render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if _render_host:
+    ALLOWED_HOSTS.append(_render_host)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
