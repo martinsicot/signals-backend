@@ -275,3 +275,35 @@ class TestStripeWebhookView:
             response = self._post(client, payload)
 
         assert response.status_code == 200
+
+    # --- idempotence ---
+
+    def test_webhook_received_twice_sends_email_only_once(self, client):
+        order = OrderFactory(status=OrderModel.Status.PENDING)
+        payload = _webhook_payload("checkout.session.completed", order.pk)
+
+        with patch("orders.services.payment_service.stripe.Webhook.construct_event") as mock_event, \
+             patch("notifications.tasks.send_payment_confirmation") as mock_task:
+            mock_task.delay = MagicMock()
+            mock_event.return_value = _make_webhook_event("checkout.session.completed", order.pk)
+
+            self._post(client, payload)
+            self._post(client, payload)
+
+        mock_task.delay.assert_called_once_with(order.pk)
+
+    def test_already_paid_order_does_not_trigger_email(self, client):
+        order = OrderFactory(status=OrderModel.Status.PAID)
+        payload = _webhook_payload("checkout.session.completed", order.pk)
+
+        with patch("orders.services.payment_service.stripe.Webhook.construct_event") as mock_event, \
+             patch("notifications.tasks.send_payment_confirmation") as mock_task:
+            mock_task.delay = MagicMock()
+            mock_event.return_value = _make_webhook_event("checkout.session.completed", order.pk)
+
+            response = self._post(client, payload)
+
+        order.refresh_from_db()
+        assert response.status_code == 200
+        assert order.status == OrderModel.Status.PAID
+        mock_task.delay.assert_not_called()
