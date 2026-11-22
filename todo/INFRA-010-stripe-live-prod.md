@@ -1,5 +1,8 @@
 # INFRA-010 — Bascule Stripe mode live + validation prod (T9.1, T9.4, T9.5 backlog)
 
+## Statut
+⬜ TODO
+
 ## Priorité
 🟡 IMPORTANT (requis avant ouverture au public)
 
@@ -12,7 +15,7 @@
 3. Créer le webhook live pointant vers `https://api.signals.fr/api/webhooks/stripe/`
    - Event : `checkout.session.completed`, `checkout.session.expired`, `payment_intent.payment_failed`
 4. Récupérer le `whsec_...` du webhook live
-5. Mettre à jour les variables d'env en prod dans Coolify
+5. Mettre à jour les variables d'env en prod dans Render.com (dashboard → Environment)
 
 ### T9.4 — Vérifications finales
 

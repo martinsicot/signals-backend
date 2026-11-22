@@ -1,5 +1,8 @@
 # INFRA-011 — Backups PostgreSQL + snapshots serveur (T9.2, T9.3 backlog)
 
+## Statut
+⬜ TODO
+
 ## Priorité
 🟢 IMPORTANT (sécurité des données)
 
@@ -7,23 +10,21 @@
 
 ### T9.2 — Backups PostgreSQL automatiques
 
-**Option A — Via Coolify** (recommandée) :
-- Configurer le backup automatique de la base PostgreSQL dans Coolify
-- Destination : Hetzner Object Storage (S3-compatible, ~2€/mois pour 10 Go)
-- Fréquence : quotidien à 3h du matin
-- Rétention : 7 jours glissants
+**Via Render.com** (natif) :
+- Dans le dashboard Render → PostgreSQL → Backups
+- Les backups quotidiens sont automatiques sur le plan payant
+- Rétention : 7 jours (plan Starter) ou 30 jours (plan Standard)
+- Téléchargement possible depuis le dashboard
 
-**Option B — Script cron** :
+**Option script externe** :
 ```bash
-# Sur le VPS, via crontab
-0 3 * * * pg_dump $DATABASE_URL | gzip > /backups/signals_$(date +%Y%m%d).sql.gz
+pg_dump $DATABASE_URL | gzip > signals_$(date +%Y%m%d).sql.gz
 ```
 
-### T9.3 — Snapshot serveur Hetzner
+### T9.3 — Snapshot infrastructure
 
-- Dans le dashboard Hetzner, activer les snapshots automatiques hebdomadaires
-- Coût : ~20% du coût serveur/mois (CX22 → +~1€/mois)
-- Permet une restauration complète du VPS en cas de panne grave
+- Render.com gère la résilience infra (pas de snapshot VPS à gérer)
+- Penser à exporter périodiquement un dump PostgreSQL vers un stockage externe (S3, Cloudflare R2)
 
 ## Test de restauration
 
