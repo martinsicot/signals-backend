@@ -1,13 +1,14 @@
-from decimal import Decimal
-from django.conf import settings
 from rest_framework import serializers
 from ..models import Category, Product, ProductVariant, AttributeValue
+from ..pricing import apply_markup, price_ttc as _price_ttc_decimal
+
+
+def _fmt(value):
+    return str(value) if value is not None else None
 
 
 def _price_ttc(price):
-    if price is None:
-        return None
-    return str(round(price * (Decimal("1") + settings.VAT_RATE), 2))
+    return _fmt(_price_ttc_decimal(price))
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -27,13 +28,16 @@ class AttributeValueSerializer(serializers.ModelSerializer):
 
 class ProductVariantSerializer(serializers.ModelSerializer):
     attributes = AttributeValueSerializer(many=True, read_only=True)
-    price_ht = serializers.DecimalField(source="price", max_digits=10, decimal_places=2, read_only=True)
+    price_ht = serializers.SerializerMethodField()
     price_ttc = serializers.SerializerMethodField()
     delai = serializers.CharField(source="price_cell.delai", read_only=True, default=None)
 
     class Meta:
         model = ProductVariant
         fields = ["id", "sku", "price_ht", "price_ttc", "weight_kg", "is_active", "attributes", "delai"]
+
+    def get_price_ht(self, obj):
+        return _fmt(apply_markup(obj.price))
 
     def get_price_ttc(self, obj):
         return _price_ttc(obj.price)
@@ -62,7 +66,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     def get_min_price(self, obj):
         prices = [v.price for v in obj.variants.all() if v.price is not None]
-        return str(min(prices)) if prices else None
+        return _fmt(apply_markup(min(prices))) if prices else None
 
     def get_min_price_ttc(self, obj):
         prices = [v.price for v in obj.variants.all() if v.price is not None]
@@ -101,13 +105,16 @@ class ProductVariantDetailSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
     product_slug = serializers.CharField(source="product.slug", read_only=True)
     attributes = AttributeValueSerializer(many=True, read_only=True)
-    price_ht = serializers.DecimalField(source="price", max_digits=10, decimal_places=2, read_only=True)
+    price_ht = serializers.SerializerMethodField()
     price_ttc = serializers.SerializerMethodField()
     delai = serializers.CharField(source="price_cell.delai", read_only=True, default=None)
 
     class Meta:
         model = ProductVariant
         fields = ["id", "sku", "price_ht", "price_ttc", "weight_kg", "is_active", "product_name", "product_slug", "attributes", "delai"]
+
+    def get_price_ht(self, obj):
+        return _fmt(apply_markup(obj.price))
 
     def get_price_ttc(self, obj):
         return _price_ttc(obj.price)

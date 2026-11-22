@@ -1,5 +1,6 @@
 from decimal import Decimal
 from catalog.repositories.product_repository import ProductRepository
+from catalog.pricing import apply_markup
 
 
 class Cart:
@@ -50,14 +51,15 @@ class Cart:
         for vid_str, item in self.cart.items():
             variant = variants.get(int(vid_str))
             if variant:
+                unit = apply_markup(variant.price)
                 yield {
                     "variant_id": variant.id,
                     "sku": variant.sku,
                     "product_name": variant.product.name,
                     "product_slug": variant.product.slug,
                     "quantity": item["quantity"],
-                    "unit_price": str(variant.price),
-                    "total_price": str(variant.price * item["quantity"]),
+                    "unit_price": str(unit),
+                    "total_price": str(unit * item["quantity"]),
                 }
 
     def get_subtotal(self) -> Decimal:
@@ -67,7 +69,7 @@ class Cart:
         total = Decimal("0")
         for vid_str, item in self.cart.items():
             try:
-                price = repo.get_variant_price(int(vid_str))
+                price = apply_markup(repo.get_variant_price(int(vid_str)))
                 total += price * item["quantity"]
             except Exception:
                 pass

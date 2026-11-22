@@ -154,3 +154,7 @@ FRONTEND_BASE_URL = env("FRONTEND_BASE_URL", default="http://localhost:3000")
 
 # Tax
 VAT_RATE = Decimal("0.20")
+
+# Price markup applied on top of cost-based DB prices before exposing to the API.
+# 1.00 = no change, 1.05 = +5%, 0.95 = -5%. Configurable via PRICE_MARKUP env var.
+PRICE_MARKUP = Decimal(env("PRICE_MARKUP", default="1.00"))
