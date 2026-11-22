@@ -18,6 +18,7 @@ class ProductRepository:
         q: str | None = None,
         shape: str | None = None,
         classe: str | None = None,
+        ordering: str | None = None,
     ):
         qs = (
             Product.objects
@@ -32,6 +33,8 @@ class ProductRepository:
             qs = qs.filter(shape=shape)
         if classe:
             qs = qs.filter(variants__classe=classe, variants__is_active=True).distinct()
+        if ordering == "-created_at":
+            qs = qs.order_by("-created_at")
         return qs
 
     # --- ProductVariant ---

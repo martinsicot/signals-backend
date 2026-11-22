@@ -35,8 +35,9 @@ class ProductListView(APIView):
         q = request.query_params.get("q", "").strip() or None
         shape = request.query_params.get("shape") or None
         classe = request.query_params.get("classe") or None
+        ordering = request.query_params.get("ordering") or None
         products = product_repo.list_active_products(
-            category_slug=category_slug, q=q, shape=shape, classe=classe
+            category_slug=category_slug, q=q, shape=shape, classe=classe, ordering=ordering
         )
 
         paginator = PageNumberPagination()
