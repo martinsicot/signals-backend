@@ -12,7 +12,6 @@ It updates: name, description, meta_title, meta_description.
 The name becomes "Panneau {code} — {nom}" when nom differs from the bare code.
 """
 
-import sys
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
@@ -129,12 +128,12 @@ class Command(BaseCommand):
             f"updated: {updated}, unchanged: {skipped}, not found: {len(not_found)}"
         ))
         if not_found:
-            self.stdout.write(f"Not found in DB ({len(not_found)}): {', '.join(not_found[:20])}")
+            self.stdout.write(self.style.WARNING(
+                f"Not found in DB ({len(not_found)}): {', '.join(not_found[:20])}"
+            ))
             if len(not_found) > 20:
                 self.stdout.write(f"  … and {len(not_found) - 20} more")
         if dry_run:
             self.stdout.write(self.style.WARNING("Dry run — no changes written."))
         else:
             self.stdout.write("Run with --dry-run first to preview changes.")
-
-        sys.exit(0 if not not_found else 1)
